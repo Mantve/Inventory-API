@@ -25,11 +25,5 @@ namespace Inventory_API.Controllers
             return Ok(DateTime.Now.ToString());
         }
 
-        [AllowAnonymous]
-        [HttpGet("connstr")]
-        public IActionResult ConnStr()
-        {
-            return Ok(Configuration.GetValue("JwtSecret","00000000000000000000000000000000000000000000"));
-        }
     }
 }

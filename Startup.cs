@@ -14,6 +14,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
 using static Inventory_API.Data.Repositories.UsersRepository;
+using Microsoft.EntityFrameworkCore;
 
 namespace Inventory_API
 {
@@ -63,8 +64,9 @@ namespace Inventory_API
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, RestContext restContext)
         {
+            restContext.Database.Migrate();
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
             app.UseCors((options => options
