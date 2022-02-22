@@ -53,7 +53,7 @@ namespace Inventory_API
                                 ValidateIssuer = false,
                                 ValidateAudience = false,
                                 ValidateLifetime = true,
-                                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(""))
+                                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("aaaaa"))
                             };
                         });
         }
@@ -64,7 +64,7 @@ namespace Inventory_API
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
             app.UseCors((options => options
-                .WithOrigins(new[] { "http://localhost:4200", "https://inventorymanageapi.azurewebsites.net" })
+                .WithOrigins(new[] { "http://localhost:4200", "http://inventorymanageapi.azurewebsites.net" })
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials()

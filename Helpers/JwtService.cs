@@ -11,7 +11,7 @@ namespace Inventory_API.Helpers
 {
     public class JwtService
     {
-        private string secureKey = "";
+        private string secureKey = "aaaaa";
 
         public string Generate(int id, string role, string name)
         {
