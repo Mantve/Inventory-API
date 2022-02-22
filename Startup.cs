@@ -13,6 +13,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
+using static Inventory_API.Data.Repositories.UsersRepository;
 
 namespace Inventory_API
 {
@@ -30,7 +31,7 @@ namespace Inventory_API
             //services.AddTransient<ICategoriesRepository, CategoriesRepository>();
             //services.AddTransient<IRecipesRepository, RecipesRepository>();
             //services.AddTransient<IIngredientsRepository, IngredientsRepository>();
-            //services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<JwtService>();
             services.AddAuthentication(options =>
             {
