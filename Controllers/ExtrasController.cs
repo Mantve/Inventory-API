@@ -29,7 +29,7 @@ namespace Inventory_API.Controllers
         [HttpGet("connstr")]
         public IActionResult ConnStr()
         {
-            return Ok(Configuration.GetConnectionString("MainDBConnection"));
+            return Ok(Configuration.GetValue("JwtSecret","00000000000000000000000000000000000000000000"));
         }
     }
 }
