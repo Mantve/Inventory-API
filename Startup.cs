@@ -57,7 +57,7 @@ namespace Inventory_API
                                 ValidateIssuer = false,
                                 ValidateAudience = false,
                                 ValidateLifetime = true,
-                                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("aaaaa"))
+                                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetValue<string>("JwtSecret")))
                             };
                         });
 
@@ -84,6 +84,10 @@ namespace Inventory_API
             });
         }
 
-
+        public Startup(IConfiguration configuration)
+        {
+            Configuration = configuration;
+        }
+        public IConfiguration Configuration { get; private set; }
     }
 }
