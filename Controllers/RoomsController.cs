@@ -4,12 +4,10 @@ using Inventory_API.Data.Entities;
 using Inventory_API.Data.Repositories;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
-using static Inventory_API.Data.Repositories.RoomRepository;
 
 namespace Inventory_API.Controllers
 {
@@ -54,7 +52,8 @@ namespace Inventory_API.Controllers
             Room room = _mapper.Map<Room>(dto);
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
             User user = await _userRepository.GetByUsername(username);
-            if (user == null) return NotFound($"User with username '{username}' not found."); room.Author = user;
+            if (user == null) return NotFound($"User with username '{username}' not found.");
+            room.Author = user;
             room = await _roomRepository.Create(room);
             return Created(string.Format("/api/room/{0}", room.Id), _mapper.Map<RoomDto>(room));
         }

@@ -4,14 +4,16 @@ using Inventory_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Inventory_API.Migrations
 {
     [DbContext(typeof(RestContext))]
-    partial class RestContextModelSnapshot : ModelSnapshot
+    [Migration("20220223142500_Categories")]
+    partial class Categories
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -46,12 +48,6 @@ namespace Inventory_API.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("AuthorUsername")
-                        .HasColumnType("nvarchar(450)");
-
-                    b.Property<int?>("CategoryId")
-                        .HasColumnType("int");
-
                     b.Property<int?>("ItemId")
                         .HasColumnType("int");
 
@@ -67,15 +63,16 @@ namespace Inventory_API.Migrations
                     b.Property<decimal>("Value")
                         .HasColumnType("decimal(18,2)");
 
+                    b.Property<int?>("categoryId")
+                        .HasColumnType("int");
+
                     b.HasKey("Id");
-
-                    b.HasIndex("AuthorUsername");
-
-                    b.HasIndex("CategoryId");
 
                     b.HasIndex("ItemId");
 
                     b.HasIndex("ListId");
+
+                    b.HasIndex("categoryId");
 
                     b.ToTable("Items");
                 });
@@ -160,14 +157,6 @@ namespace Inventory_API.Migrations
 
             modelBuilder.Entity("Inventory_API.Data.Entities.Item", b =>
                 {
-                    b.HasOne("Inventory_API.Data.Entities.User", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorUsername");
-
-                    b.HasOne("Inventory_API.Data.Entities.Category", "Category")
-                        .WithMany()
-                        .HasForeignKey("CategoryId");
-
                     b.HasOne("Inventory_API.Data.Entities.Item", null)
                         .WithMany("Items")
                         .HasForeignKey("ItemId");
@@ -176,9 +165,11 @@ namespace Inventory_API.Migrations
                         .WithMany("Items")
                         .HasForeignKey("ListId");
 
-                    b.Navigation("Author");
+                    b.HasOne("Inventory_API.Data.Entities.Category", "category")
+                        .WithMany()
+                        .HasForeignKey("categoryId");
 
-                    b.Navigation("Category");
+                    b.Navigation("category");
                 });
 
             modelBuilder.Entity("Inventory_API.Data.Entities.List", b =>

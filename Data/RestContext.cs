@@ -1,11 +1,5 @@
 ﻿using Inventory_API.Data.Entities;
 using Microsoft.EntityFrameworkCore;
-using System.Configuration;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.IdentityModel.Protocols;
 using Microsoft.Extensions.Configuration;
 
 namespace Inventory_API.Data
@@ -22,7 +16,7 @@ namespace Inventory_API.Data
         public DbSet<Item> Items { get; set; }
         public DbSet<List> Lists { get; set; }
         public DbSet<Room> Rooms { get; set; }
-
+        public DbSet<Category> Categories { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

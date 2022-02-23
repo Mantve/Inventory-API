@@ -3,13 +3,9 @@ using Inventory_API.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
@@ -35,6 +31,8 @@ namespace Inventory_API
             services.AddControllers();
             services.AddTransient<IRoomRepository, RoomRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
+            services.AddTransient<ICategoryRepository, CategoryRepository>();
+            services.AddTransient<IItemRepository, ItemRepository>();
             services.AddTransient<JwtService>();
             services.AddAuthentication(options =>
             {

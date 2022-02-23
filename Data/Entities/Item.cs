@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Inventory_API.Data.Entities
 {
@@ -12,6 +9,7 @@ namespace Inventory_API.Data.Entities
         public float Quantity { get; set; }
         public ICollection<Item> Items { get; set; }
         public decimal Value { get; set; }
-        public Category category { get; set; }
+        public Category Category { get; set; }
+        public User Author { get; set; }
     }
 }
