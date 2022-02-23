@@ -17,15 +17,15 @@ namespace Inventory_API.Controllers
     [Route("api/room")]
     public class RoomsController : ControllerBase
     {
-        private readonly IRoomRepository RoomRepository;
-        private readonly IUserRepository UserRepository;
-        private readonly IMapper Mapper;
+        private readonly IRoomRepository _roomRepository;
+        private readonly IUserRepository _userRepository;
+        private readonly IMapper _mapper;
 
         public RoomsController(IRoomRepository roomRepository, IUserRepository userRepository, IMapper mapper)
         {
-            this.RoomRepository = roomRepository;
-            this.UserRepository = userRepository;
-            this.Mapper = mapper;
+            this._roomRepository = roomRepository;
+            this._userRepository = userRepository;
+            this._mapper = mapper;
         }
 
         [Authorize]
@@ -33,7 +33,7 @@ namespace Inventory_API.Controllers
         public async Task<IEnumerable<RoomDto>> GetAll()
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            return (await RoomRepository.GetAll(username)).Select(o => Mapper.Map<RoomDto>(o));
+            return (await _roomRepository.GetAll(username)).Select(o => _mapper.Map<RoomDto>(o));
         }
 
         [Authorize]
@@ -41,22 +41,22 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<RoomDto>> Get(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            Room room = await RoomRepository.Get(id, username);
+            Room room = await _roomRepository.Get(id, username);
             if (room == null) return NotFound($"Room with id '{id}' not found.");
 
-            return Ok(Mapper.Map<RoomDto>(room));
+            return Ok(_mapper.Map<RoomDto>(room));
         }
 
         [Authorize]
         [HttpPost]
         public async Task<ActionResult<RoomDto>> Post(CreateRoomDto dto)
         {
-            Room room = Mapper.Map<Room>(dto);
+            Room room = _mapper.Map<Room>(dto);
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            User user = await UserRepository.GetByUsername(username);
+            User user = await _userRepository.GetByUsername(username);
             if (user == null) return NotFound($"User with username '{username}' not found."); room.Author = user;
-            room = await RoomRepository.Create(room);
-            return Created(string.Format("/api/room/{0}", room.Id), Mapper.Map<RoomDto>(room));
+            room = await _roomRepository.Create(room);
+            return Created(string.Format("/api/room/{0}", room.Id), _mapper.Map<RoomDto>(room));
         }
 
         [Authorize]
@@ -64,12 +64,12 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<RoomDto>> Put(int id, UpdateRoomDto dto)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            Room room= await RoomRepository.Get(id,username);
+            Room room= await _roomRepository.Get(id,username);
             if (room == null)
                 return NotFound("Room not found");
-            Mapper.Map(dto, room);
-            await RoomRepository.Put(room);
-            return Ok(Mapper.Map<RoomDto>(room));
+            _mapper.Map(dto, room);
+            await _roomRepository.Put(room);
+            return Ok(_mapper.Map<RoomDto>(room));
         }
 
         [Authorize]
@@ -77,10 +77,10 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<RoomDto>> Delete(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            Room room = await RoomRepository.Get(id, username);
+            Room room = await _roomRepository.Get(id, username);
             if (room == null)
                 return NotFound("Room not found");
-            await RoomRepository.Delete(room);
+            await _roomRepository.Delete(room);
             return NoContent();
         }
     }
