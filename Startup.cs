@@ -13,8 +13,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Configuration;
-using static Inventory_API.Data.Repositories.UsersRepository;
 using Microsoft.EntityFrameworkCore;
+using Inventory_API.Data.Repositories;
+using Microsoft.OpenApi.Models;
 
 namespace Inventory_API
 {
@@ -24,14 +25,15 @@ namespace Inventory_API
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
-            
+            services.AddSwaggerGen(swagger =>
+            {
+                swagger.SwaggerDoc("v1", new OpenApiInfo { Title = "My API" });
+            }); 
             services.AddCors();
             services.AddDbContext<RestContext>();
             services.AddAutoMapper(typeof(Startup));
             services.AddControllers();
-            //services.AddTransient<ICategoriesRepository, CategoriesRepository>();
-            //services.AddTransient<IRecipesRepository, RecipesRepository>();
-            //services.AddTransient<IIngredientsRepository, IngredientsRepository>();
+            services.AddTransient<IRoomRepository, RoomRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<JwtService>();
             services.AddAuthentication(options =>
@@ -75,6 +77,11 @@ namespace Inventory_API
                 .AllowAnyMethod()
                 .AllowCredentials()
             ));
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/v1/swagger.json", "My Test1 Api v1");
+            });
             app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();

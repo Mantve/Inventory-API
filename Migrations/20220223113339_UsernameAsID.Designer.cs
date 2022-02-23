@@ -4,14 +4,16 @@ using Inventory_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Inventory_API.Migrations
 {
     [DbContext(typeof(RestContext))]
-    partial class RestContextModelSnapshot : ModelSnapshot
+    [Migration("20220223113339_UsernameAsID")]
+    partial class UsernameAsID
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -121,15 +123,10 @@ namespace Inventory_API.Migrations
                     b.Property<string>("Role")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("RoomId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Username1")
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Username");
-
-                    b.HasIndex("RoomId");
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -174,10 +171,6 @@ namespace Inventory_API.Migrations
 
             modelBuilder.Entity("Inventory_API.Data.Entities.User", b =>
                 {
-                    b.HasOne("Inventory_API.Data.Entities.Room", null)
-                        .WithMany("SharedWith")
-                        .HasForeignKey("RoomId");
-
                     b.HasOne("Inventory_API.Data.Entities.User", null)
                         .WithMany("Friends")
                         .HasForeignKey("Username1");
@@ -191,11 +184,6 @@ namespace Inventory_API.Migrations
             modelBuilder.Entity("Inventory_API.Data.Entities.List", b =>
                 {
                     b.Navigation("Items");
-                });
-
-            modelBuilder.Entity("Inventory_API.Data.Entities.Room", b =>
-                {
-                    b.Navigation("SharedWith");
                 });
 
             modelBuilder.Entity("Inventory_API.Data.Entities.User", b =>

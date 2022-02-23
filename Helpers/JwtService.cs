@@ -19,13 +19,13 @@ namespace Inventory_API.Helpers
         public IConfiguration Configuration { get; private set; }
 
 
-        public string Generate(int id, string role, string name)
+        public string Generate(string role, string name)
         {
             var symmetricSecurityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetValue<string>("JwtSecret")));
             var credentials = new SigningCredentials(symmetricSecurityKey, SecurityAlgorithms.HmacSha256Signature);
             var header = new JwtHeader(credentials);
             var roles = new List<Claim> { new Claim(ClaimsIdentity.DefaultRoleClaimType, role), new Claim(ClaimsIdentity.DefaultNameClaimType, name) };
-            var payload = new JwtPayload(id.ToString(), null, roles, null, DateTime.Today.AddDays(1));
+            var payload = new JwtPayload(name, null, roles, null, DateTime.Today.AddDays(1));
             var securityToken = new JwtSecurityToken(header, payload);
 
             return new JwtSecurityTokenHandler().WriteToken(securityToken);

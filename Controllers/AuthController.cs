@@ -1,5 +1,7 @@
-﻿using Inventory_API.Data.Dtos.User;
+﻿using AutoMapper;
+using Inventory_API.Data.Dtos.User;
 using Inventory_API.Data.Entities;
+using Inventory_API.Data.Repositories;
 using Inventory_API.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
@@ -8,7 +10,6 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using static Inventory_API.Data.Repositories.UsersRepository;
 
 namespace Inventory_API.Controllers
 {
@@ -18,11 +19,13 @@ namespace Inventory_API.Controllers
     {
         private readonly IUserRepository _repository;
         private readonly JwtService _jwtService;
+        private readonly IMapper _mapper;
 
-        public AuthController(IUserRepository repository, JwtService jwtService)
+        public AuthController(IUserRepository repository, JwtService jwtService, IMapper mapper)
         {
             _repository = repository;
             _jwtService = jwtService;
+            _mapper = mapper;
         }
 
         [AllowAnonymous]
@@ -47,7 +50,7 @@ namespace Inventory_API.Controllers
         [HttpPost("login")]
         public IActionResult Login(LoginDto dto)
         {
-            var user = _repository.GetByUsername(dto.Username);
+            User user = _repository.GetByUsername(dto.Username).Result;
 
             if (user == null) return BadRequest(new { message = "User not found" });
 
@@ -56,7 +59,7 @@ namespace Inventory_API.Controllers
                 return BadRequest(new { message = "Invalid password" });
             }
 
-            var jwt = _jwtService.Generate(user.Id, user.Role, user.Username);
+            var jwt = _jwtService.Generate( user.Role, user.Username);
 
             Response.Cookies.Append("jwt", jwt, new CookieOptions
             {
@@ -71,7 +74,7 @@ namespace Inventory_API.Controllers
 
         [Authorize]
         [HttpGet("user")]
-        public IActionResult UserInfo()
+        public async Task<ActionResult<UserDto>> UserInfo()
         {
             try
             {
@@ -79,11 +82,11 @@ namespace Inventory_API.Controllers
 
                 var token = _jwtService.Verify(jwt);
 
-                int userId = int.Parse(token.Issuer);
+                string username = token.Issuer;
 
-                var user = _repository.GetById(userId);
+                var user = await _repository.GetByUsername(username);
 
-                return Ok(user);
+                return Ok(_mapper.Map<UserDto>(user));
             }
             catch (Exception)
             {
@@ -91,9 +94,27 @@ namespace Inventory_API.Controllers
             }
         }
 
-        private IActionResult Unauthorized()
+
+        [Authorize]
+        [HttpGet("detaileduser")]
+        public async Task<ActionResult<DetailedUserDto>> DetailedUserInfo()
         {
-            throw new NotImplementedException();
+            try
+            {
+                var jwt = Request.Cookies["jwt"];
+
+                var token = _jwtService.Verify(jwt);
+
+                string username = token.Issuer;
+
+                var user = await _repository.GetByUsername(username);
+
+                return Ok(_mapper.Map<DetailedUserDto>(user));
+            }
+            catch (Exception)
+            {
+                return Unauthorized();
+            }
         }
 
         [Authorize]

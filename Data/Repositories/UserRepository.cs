@@ -7,13 +7,11 @@ using System.Threading.Tasks;
 
 namespace Inventory_API.Data.Repositories
 {
-    public class UsersRepository
-    {
+    
         public interface IUserRepository
         {
-            User Create(User user);
-            User GetByUsername(string username);
-            User GetById(int id);
+            Task<User> Create(User user);
+            Task<User> GetByUsername(string username);
             Task<User> Put(User user);
             Task<IEnumerable<User>> GetByRole(string role);
         }
@@ -27,23 +25,19 @@ namespace Inventory_API.Data.Repositories
                 RestContext = restContext;
             }
 
-            public User Create(User user)
+            public async Task<User> Create(User user)
             {
                 RestContext.Users.Add(user);
-                user.Id = RestContext.SaveChanges();
+                await RestContext.SaveChangesAsync();
 
                 return user;
             }
 
-            public User GetByUsername(string username)
+            public async Task<User> GetByUsername(string username)
             {
-                return RestContext.Users.FirstOrDefault(u => u.Username == username);
+                return await RestContext.Users.FirstOrDefaultAsync(u => u.Username == username);
             }
 
-            public User GetById(int id)
-            {
-                return RestContext.Users.FirstOrDefault(u => u.Id == id);
-            }
 
             public async Task<User> Put(User user)
             {
@@ -57,5 +51,5 @@ namespace Inventory_API.Data.Repositories
                 return await RestContext.Users.Where(o => o.Role == role || role == null).ToListAsync();
             }
         }
-    }
+    
 }
