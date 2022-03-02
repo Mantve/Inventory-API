@@ -30,7 +30,8 @@ namespace Inventory_API.Controllers
         [HttpPost("register")]
         public IActionResult Register(RegisterDto dto)
         {
-            if (_repository.GetByUsername(dto.Username) != null)
+            var a = _repository.GetByUsername(dto.Username).Result;
+            if (a != null)
             {
                 return BadRequest(new { message = "Username is taken" });
             }
