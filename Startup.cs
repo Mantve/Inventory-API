@@ -70,7 +70,7 @@ namespace Inventory_API
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
             app.UseCors((options => options
-                .WithOrigins(new[] { "http://localhost:4200", "http://inventorymanageapi.azurewebsites.net" })
+                .WithOrigins(new[] { "http://localhost:4200", "https://stuff.mantve.eu/", "https://mantve.github.io/" })
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials()
