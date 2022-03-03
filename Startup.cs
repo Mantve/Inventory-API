@@ -69,8 +69,9 @@ namespace Inventory_API
             restContext.Database.Migrate();
             if (env.IsDevelopment())
                 app.UseDeveloperExceptionPage();
+            app.UseRouting();
             app.UseCors((options => options
-                .WithOrigins(new[] { "http://localhost:4200", "https://stuff.mantve.eu/", "https://mantve.github.io/" })
+                .WithOrigins(new[] { "http://localhost:4200", "https://stuff.mantve.eu/", "https://mantve.github.io/Inventory-webapp" })
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials()
@@ -80,7 +81,6 @@ namespace Inventory_API
             {
                 c.SwaggerEndpoint("/swagger/v1/swagger.json", "My Test1 Api v1");
             });
-            app.UseRouting();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseEndpoints(endpoints =>
