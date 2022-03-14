@@ -2,6 +2,13 @@
 
 namespace Inventory_API.Data.Dtos.Item
 {
-    public record UpdateItemDto( string Name, float Quantity, decimal Value, CategoryDto Category, int? ParentItemId, string Comments, int RoomId);
+    public record UpdateItemDto(
+        string Name,
+        float Quantity,
+        decimal Value,
+        int CategoryId,
+        int? ParentItemId, 
+        string Comments,
+        int RoomId);
 
 }

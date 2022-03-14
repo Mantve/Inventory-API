@@ -3,6 +3,8 @@ using System.Collections.Generic;
 
 namespace Inventory_API.Data.Dtos.Room
 {
-    public record UpdateRoomDto(string Name, List<UserDto> SharedWith);
+    public record UpdateRoomDto(
+        string Name, 
+        List<UserDto> SharedWith);
 
 }
