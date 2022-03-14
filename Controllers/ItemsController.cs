@@ -17,31 +17,35 @@ namespace Inventory_API.Controllers
     {
         private readonly IItemRepository _itemRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IRoomRepository _roomRepository;
         private readonly ICategoryRepository _categoryRepository;
         private readonly IMapper _mapper;
 
-        public ItemsController(IItemRepository itemRepository, IUserRepository userRepository, ICategoryRepository categoryRepository, IMapper mapper)
+        public ItemsController(IItemRepository itemRepository, IRoomRepository roomRepository, IUserRepository userRepository, ICategoryRepository categoryRepository, IMapper mapper)
         {
-            this._itemRepository = itemRepository;
-            this._userRepository = userRepository;
-            this._categoryRepository = categoryRepository;
-            this._mapper = mapper;
+            _roomRepository = roomRepository;
+            _itemRepository = itemRepository;
+            _userRepository = userRepository;
+            _categoryRepository = categoryRepository;
+            _mapper = mapper;
         }
 
         [Authorize]
-        [HttpGet("recursive")]
-        public async Task<IEnumerable<RecursiveItemDto>> GetAllRecursive()
+        [HttpGet("all/recursive/{roomId}")]
+        public async Task<ActionResult<IEnumerable<RecursiveItemDto>>> GetAllRecursive(int roomId)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            return (await _itemRepository.GetAll(username)).Select(o => _mapper.Map<RecursiveItemDto>(o));
+            if (await _roomRepository.Get(roomId, username) == null) return Forbid();
+            return Ok((await _itemRepository.GetAll(roomId)).Select(o => _mapper.Map<RecursiveItemDto>(o)));
         }
 
         [Authorize]
-        [HttpGet]
-        public async Task<IEnumerable<ItemDto>> GetAll()
+        [HttpGet("all/{roomId}")]
+        public async Task<ActionResult<IEnumerable<ItemDto>>> GetAll(int roomId)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            return (await _itemRepository.GetAll(username)).Select(o => _mapper.Map<ItemDto>(o));
+            if (await _roomRepository.Get(roomId, username) == null) return Forbid();
+            return Ok((await _itemRepository.GetAll(roomId)).Select(o => _mapper.Map<ItemDto>(o)));
         }
 
         [Authorize]
@@ -50,7 +54,7 @@ namespace Inventory_API.Controllers
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
             Item item = await _itemRepository.Get(id, username);
-            if (item == null) return NotFound($"Item with id '{id}' not found.");
+            if (item == null || !item.Room.SharedWith.Any(x => x.Username == username)) return NotFound($"Item with id '{id}' not found.");
 
             return Ok(_mapper.Map<RecursiveItemDto>(item));
         }
@@ -60,9 +64,8 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<ItemDto>> Get(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            Item item = await _itemRepository.Get(id, username);
-            if (item == null) return NotFound($"Item with id '{id}' not found.");
-
+            Item item = await _itemRepository.Get(id);
+            if (item == null || !item.Room.SharedWith.Any(x => x.Username == username)) return NotFound($"Item with id '{id}' not found.");
             return Ok(_mapper.Map<ItemDto>(item));
         }
 
@@ -74,10 +77,27 @@ namespace Inventory_API.Controllers
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
             User user = await _userRepository.GetByUsername(username);
             if (user == null) return NotFound($"User with username '{username}' not found.");
-            Category category = await _categoryRepository.Get(dto.CategoryId,username);
+
+            Item parentItem = null;
+            if (dto.ParentItemId != null)
+            {
+                parentItem = await _itemRepository.Get((int)dto.ParentItemId);
+                if (parentItem == null || !parentItem.Room.SharedWith.Any(x => x.Username == username)) return NotFound($"Parent item not found");
+            }
+
+            Room room = await _roomRepository.Get(dto.RoomId, username);
+            if(room==null) return NotFound($"Room with id'{dto.RoomId}' not found.");
+
+            Category category = await _categoryRepository.Get(dto.CategoryId, username);
             item.Category = category;
             item.Author = user;
+            item.Room = room;
             item = await _itemRepository.Create(item);
+            if (parentItem != null)
+            {
+                parentItem.Items.Add(item);
+                await _itemRepository.Put(parentItem);
+            }
             return Created(string.Format("/api/item/{0}", item.Id), _mapper.Map<ItemDto>(item));
         }
 
@@ -86,11 +106,28 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<ItemDto>> Put(int id, UpdateItemDto dto)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            Item item = await _itemRepository.Get(id, username);
-            if (item == null)
+            Item item = await _itemRepository.Get(id);
+            if (item == null || !item.Room.SharedWith.Any(x => x.Username == username))
                 return NotFound("Item not found");
+            Item parentItem = await _itemRepository.GetParent(item);
+            if (parentItem != null && parentItem.Id != dto.ParentItemId)
+            {
+                parentItem.Items.Remove(item);
+                await _itemRepository.Put(parentItem);
+            }
+            Item newParentItem = null;
+            if (dto.ParentItemId != null)
+            {
+                newParentItem = await _itemRepository.Get((int)dto.ParentItemId);
+                if (newParentItem == null || !item.Room.SharedWith.Any(x => x.Username == username)) return NotFound($"Parent item not found");
+            }
             _mapper.Map(dto, item);
             await _itemRepository.Put(item);
+            if (newParentItem != null)
+            {
+                newParentItem.Items.Add(item);
+                await _itemRepository.Put(newParentItem);
+            }
             return Ok(_mapper.Map<ItemDto>(item));
         }
 
@@ -99,8 +136,8 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<ItemDto>> Delete(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            Item item = await _itemRepository.Get(id, username);
-            if (item == null)
+            Item item = await _itemRepository.Get(id);
+            if (item == null || !item.Room.SharedWith.Any(x => x.Username == username))
                 return NotFound("Item not found");
             await _itemRepository.Delete(item);
             return NoContent();

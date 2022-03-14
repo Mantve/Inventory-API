@@ -11,5 +11,7 @@ namespace Inventory_API.Data.Entities
         public decimal Value { get; set; }
         public Category Category { get; set; }
         public User Author { get; set; }
+        public string Comments { get; set; }
+        public Room Room { get; set; }
     }
 }

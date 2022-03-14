@@ -11,7 +11,10 @@ namespace Inventory_API.Data.Repositories
         Task<Item> Create(Item item);
         Task Delete(Item item);
         Task<Item> Get(int id, string username);
+        Task<Item> Get(int id);
+        Task<Item> GetParent(Item item);
         Task<IEnumerable<Item>> GetAll(string username);
+        Task<IEnumerable<Item>> GetAll(int roomId);
         Task<Item> Put(Item item);
     }
 
@@ -31,15 +34,34 @@ namespace Inventory_API.Data.Repositories
 
             return item;
         }
+        public async Task<Item> Get(int id, ICollection<string> usernames)
+        {
+            return await _restContext.Items.Include(x => x.Room).ThenInclude(x=> x.SharedWith).Include(x => x.Items).Include(x => x.Category).FirstOrDefaultAsync(x => x.Id == id && usernames.Contains(x.Author.Username));
+        }
 
         public async Task<Item> Get(int id, string username)
         {
-            return await _restContext.Items.FirstOrDefaultAsync(x => x.Id == id && x.Author.Username == username);
+            return await _restContext.Items.Include(x => x.Room).ThenInclude(x => x.SharedWith).Include(x => x.Items).Include(x=> x.Category).FirstOrDefaultAsync(x => x.Id == id && x.Author.Username == username);
+        }
+
+        public async Task<Item> Get(int id)
+        {
+            return await _restContext.Items.Include(x => x.Room).ThenInclude(x => x.SharedWith).Include(x=>x.Items).FirstOrDefaultAsync(x => x.Id == id);
         }
 
         public async Task<IEnumerable<Item>> GetAll(string username)
         {
-            return await _restContext.Items.Where(x => x.Author.Username == username).ToListAsync();
+            return await _restContext.Items.Include(x => x.Room).ThenInclude(x => x.SharedWith).Include(x => x.Items).Include(x => x.Category).Where(x => x.Author.Username == username).ToListAsync();
+        }
+
+        public async Task<IEnumerable<Item>> GetAll(int roomId)
+        {
+            return await _restContext.Items.Include(x => x.Room).ThenInclude(x => x.SharedWith).Include(x => x.Items).Include(x=> x.Category).Where(x => x.Room.Id == roomId).ToListAsync();
+        }
+
+        public async Task<Item> GetParent(Item item)
+        {
+            return await _restContext.Items.Include(x => x.Room).ThenInclude(x => x.SharedWith).Include(x => x.Items).Include(x => x.Category).FirstOrDefaultAsync(x => x.Items.Contains(item));
         }
 
         public async Task<Item> Put(Item item)

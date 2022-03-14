@@ -54,6 +54,7 @@ namespace Inventory_API.Controllers
             User user = await _userRepository.GetByUsername(username);
             if (user == null) return NotFound($"User with username '{username}' not found.");
             room.Author = user;
+            room.SharedWith.Add(user);
             room = await _roomRepository.Create(room);
             return Created(string.Format("/api/room/{0}", room.Id), _mapper.Map<RoomDto>(room));
         }

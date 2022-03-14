@@ -8,5 +8,6 @@ namespace Inventory_API.Data.Entities
         public string Name { get; set; }
         public ICollection<User> SharedWith { get; set; }
         public User Author { get; set; }
+        public ICollection<Item> Items { get; set; }
     }
 }

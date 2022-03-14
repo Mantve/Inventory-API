@@ -35,7 +35,7 @@ namespace Inventory_API.Data.Repositories
 
         public async Task<Room> Get(int id, string username)
         {
-            return await _restContext.Rooms.FirstOrDefaultAsync(x => x.Id == id && x.Author.Username == username);
+            return await _restContext.Rooms.FirstOrDefaultAsync(x => x.Id == id && x.SharedWith.Any( y => y.Username == username));
         }
 
         public async Task<IEnumerable<Room>> GetAll(string username)

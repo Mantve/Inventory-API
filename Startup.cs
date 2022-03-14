@@ -24,7 +24,7 @@ namespace Inventory_API
             services.AddSwaggerGen(swagger =>
             {
                 swagger.SwaggerDoc("v1", new OpenApiInfo { Title = "My API" });
-            }); 
+            });
             services.AddCors();
             services.AddDbContext<RestContext>();
             services.AddAutoMapper(typeof(Startup));
@@ -39,6 +39,7 @@ namespace Inventory_API
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
                 options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+
             })                        // Adding Jwt Bearer
                         .AddJwtBearer(options =>
                         {
@@ -71,10 +72,11 @@ namespace Inventory_API
                 app.UseDeveloperExceptionPage();
             app.UseRouting();
             app.UseCors((options => options
-                .WithOrigins(new[] { "http://localhost:4200", "https://stuff.mantve.eu/", "https://mantve.github.io/Inventory-webapp" })
+                .WithOrigins(new[] { "http://localhost:4200", "https://stuff.mantve.eu", "https://mantve.github.io" })
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials()
+                .WithExposedHeaders("Access-Control-Allow-Origin")
             ));
             app.UseSwagger();
             app.UseSwaggerUI(c =>
