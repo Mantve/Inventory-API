@@ -1,4 +1,4 @@
 ﻿namespace Inventory_API.Data.Dtos.Category
 {
-    public record CategoryDto(int Id, string Name);
+    public record CategoryDto(int Id, string Name, string Description);
 }

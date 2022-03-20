@@ -4,14 +4,16 @@ using Inventory_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Inventory_API.Migrations
 {
     [DbContext(typeof(RestContext))]
-    partial class RestContextModelSnapshot : ModelSnapshot
+    [Migration("20220318133135_ItemLevels")]
+    partial class ItemLevels
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -28,9 +30,6 @@ namespace Inventory_API.Migrations
 
                     b.Property<string>("AuthorUsername")
                         .HasColumnType("nvarchar(450)");
-
-                    b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
@@ -58,6 +57,9 @@ namespace Inventory_API.Migrations
                     b.Property<string>("Comments")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<int?>("ItemId")
+                        .HasColumnType("int");
+
                     b.Property<int>("Level")
                         .HasColumnType("int");
 
@@ -66,9 +68,6 @@ namespace Inventory_API.Migrations
 
                     b.Property<string>("Name")
                         .HasColumnType("nvarchar(max)");
-
-                    b.Property<int?>("ParentItemId")
-                        .HasColumnType("int");
 
                     b.Property<float>("Quantity")
                         .HasColumnType("real");
@@ -85,9 +84,9 @@ namespace Inventory_API.Migrations
 
                     b.HasIndex("CategoryId");
 
-                    b.HasIndex("ListId");
+                    b.HasIndex("ItemId");
 
-                    b.HasIndex("ParentItemId");
+                    b.HasIndex("ListId");
 
                     b.HasIndex("RoomId");
 
@@ -182,13 +181,13 @@ namespace Inventory_API.Migrations
                         .WithMany()
                         .HasForeignKey("CategoryId");
 
+                    b.HasOne("Inventory_API.Data.Entities.Item", null)
+                        .WithMany("Items")
+                        .HasForeignKey("ItemId");
+
                     b.HasOne("Inventory_API.Data.Entities.List", null)
                         .WithMany("Items")
                         .HasForeignKey("ListId");
-
-                    b.HasOne("Inventory_API.Data.Entities.Item", "ParentItem")
-                        .WithMany("Items")
-                        .HasForeignKey("ParentItemId");
 
                     b.HasOne("Inventory_API.Data.Entities.Room", "Room")
                         .WithMany("Items")
@@ -197,8 +196,6 @@ namespace Inventory_API.Migrations
                     b.Navigation("Author");
 
                     b.Navigation("Category");
-
-                    b.Navigation("ParentItem");
 
                     b.Navigation("Room");
                 });

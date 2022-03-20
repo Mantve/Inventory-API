@@ -36,7 +36,7 @@ namespace Inventory_API.Controllers
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
             if (await _roomRepository.Get(roomId, username) == null) return Forbid();
-            return Ok((await _itemRepository.GetAll(roomId)).Select(o => _mapper.Map<RecursiveItemDto>(o)));
+            return Ok((await _itemRepository.GetAllRecursive(roomId)).Select(o => _mapper.Map<RecursiveItemDto>(o)));
         }
 
         [Authorize]
@@ -53,7 +53,7 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<RecursiveItemDto>> GetRecursive(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            Item item = await _itemRepository.Get(id, username);
+            Item item = await _itemRepository.Get(id);
             if (item == null || !item.Room.SharedWith.Any(x => x.Username == username)) return NotFound($"Item with id '{id}' not found.");
 
             return Ok(_mapper.Map<RecursiveItemDto>(item));
@@ -103,7 +103,7 @@ namespace Inventory_API.Controllers
 
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<ActionResult<ItemDto>> Put(int id, UpdateItemDto dto)
+        public async Task<ActionResult<ItemDto>> Put(int id, UpdateItemDto dto) // need to do validation to prevent loops
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
             Item item = await _itemRepository.Get(id);
@@ -139,6 +139,19 @@ namespace Inventory_API.Controllers
             Item item = await _itemRepository.Get(id);
             if (item == null || !item.Room.SharedWith.Any(x => x.Username == username))
                 return NotFound("Item not found");
+            foreach (Item child in item.Items){
+                await Delete(child);
+            }
+            await _itemRepository.Delete(item);
+            return NoContent();
+        }
+
+        public async Task<ActionResult<ItemDto>> Delete(Item item)
+        {
+            foreach (Item child in item.Items)
+            {
+                await Delete(child);
+            }
             await _itemRepository.Delete(item);
             return NoContent();
         }

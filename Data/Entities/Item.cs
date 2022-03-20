@@ -13,5 +13,7 @@ namespace Inventory_API.Data.Entities
         public User Author { get; set; }
         public string Comments { get; set; }
         public Room Room { get; set; }
+        public int Level { get; set; }
+        public Item ParentItem { get; set; }
     }
 }

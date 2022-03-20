@@ -10,5 +10,7 @@ namespace Inventory_API.Data.Dtos.Item
         decimal Value,
         CategoryDto Category,
         string Comments,
-        RoomDto Room);
+        RoomDto Room,
+        int Level,
+        ItemDto ParentItem);
 }

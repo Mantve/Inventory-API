@@ -12,6 +12,8 @@ namespace Inventory_API.Data.Dtos.Item
         string Comments,
         RoomDto Room,
         CategoryDto Category, 
-        List<RecursiveItemDto> Items);
+        List<RecursiveItemDto> Items,
+        int Level,
+        ItemDto ParentItem );
 
 }

@@ -2,6 +2,6 @@
 
 namespace Inventory_API.Data.Dtos.Category
 {
-    public record UpdateCategoryDto([Required] string Name);
+    public record UpdateCategoryDto([Required] string Name, string Description );
 
 }
