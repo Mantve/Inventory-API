@@ -6,6 +6,7 @@ namespace Inventory_API.Data.Entities
     {
         public int Id { get; set; }
         public string Name { get; set; }
-        public ICollection<Item> Items { get; set; }
+        public ICollection<ListItem> Items { get; set; }
+        public User Author { get; set; }
     }
 }

@@ -29,10 +29,12 @@ namespace Inventory_API
             services.AddDbContext<RestContext>();
             services.AddAutoMapper(typeof(Startup));
             services.AddControllers();
+            services.AddTransient<IListItemRepository, ListItemRepository>();
             services.AddTransient<IRoomRepository, RoomRepository>();
             services.AddTransient<IUserRepository, UserRepository>();
             services.AddTransient<ICategoryRepository, CategoryRepository>();
             services.AddTransient<IItemRepository, ItemRepository>();
+            services.AddTransient<IListRepository, ListRepository>();
             services.AddTransient<JwtService>();
             services.AddAuthentication(options =>
             {

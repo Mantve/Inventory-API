@@ -21,9 +21,9 @@ namespace Inventory_API.Controllers
 
         public RoomsController(IRoomRepository roomRepository, IUserRepository userRepository, IMapper mapper)
         {
-            this._roomRepository = roomRepository;
-            this._userRepository = userRepository;
-            this._mapper = mapper;
+            _roomRepository = roomRepository;
+            _userRepository = userRepository;
+            _mapper = mapper;
         }
 
         [Authorize]

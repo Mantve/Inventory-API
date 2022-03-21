@@ -21,9 +21,9 @@ namespace Inventory_API.Controllers
 
         public CategoriesController(ICategoryRepository categoryRepository, IUserRepository userRepository, IMapper mapper)
         {
-            this._categoryRepository = categoryRepository;
-            this._userRepository = userRepository;
-            this._mapper = mapper;
+            _categoryRepository = categoryRepository;
+            _userRepository = userRepository;
+            _mapper = mapper;
         }
 
         [Authorize]
@@ -49,10 +49,10 @@ namespace Inventory_API.Controllers
         [HttpPost]
         public async Task<ActionResult<CategoryDto>> Post(CreateCategoryDto dto)
         {
-            Category category = _mapper.Map<Category>(dto);
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
             User user = await _userRepository.GetByUsername(username);
             if (user == null) return NotFound($"User with username '{username}' not found.");
+            Category category = _mapper.Map<Category>(dto);
             category.Author = user;
             category = await _categoryRepository.Create(category);
             return Created(string.Format("/api/category/{0}", category.Id), _mapper.Map<CategoryDto>(category));

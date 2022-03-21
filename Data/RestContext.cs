@@ -17,6 +17,7 @@ namespace Inventory_API.Data
         public DbSet<List> Lists { get; set; }
         public DbSet<Room> Rooms { get; set; }
         public DbSet<Category> Categories { get; set; }
+        public DbSet<ListItem> ListItems { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

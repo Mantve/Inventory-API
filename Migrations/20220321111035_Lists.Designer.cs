@@ -4,14 +4,16 @@ using Inventory_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Inventory_API.Migrations
 {
     [DbContext(typeof(RestContext))]
-    partial class RestContextModelSnapshot : ModelSnapshot
+    [Migration("20220321111035_Lists")]
+    partial class Lists
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -122,16 +124,16 @@ namespace Inventory_API.Migrations
                     b.Property<int?>("ItemId")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ParentListId")
+                    b.Property<int?>("ListId")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ItemId");
 
-                    b.HasIndex("ParentListId");
+                    b.HasIndex("ListId");
 
-                    b.ToTable("ListItems");
+                    b.ToTable("ListItem");
                 });
 
             modelBuilder.Entity("Inventory_API.Data.Entities.Room", b =>
@@ -234,13 +236,11 @@ namespace Inventory_API.Migrations
                         .WithMany()
                         .HasForeignKey("ItemId");
 
-                    b.HasOne("Inventory_API.Data.Entities.List", "ParentList")
+                    b.HasOne("Inventory_API.Data.Entities.List", null)
                         .WithMany("Items")
-                        .HasForeignKey("ParentListId");
+                        .HasForeignKey("ListId");
 
                     b.Navigation("Item");
-
-                    b.Navigation("ParentList");
                 });
 
             modelBuilder.Entity("Inventory_API.Data.Entities.Room", b =>

@@ -2,6 +2,6 @@
 
 namespace Inventory_API.Data.Dtos.Category
 {
-    public record CreateCategoryDto([Required]string Name,string Description);
+    public record CreateCategoryDto([Required()]string Name,string Description);
 
 }

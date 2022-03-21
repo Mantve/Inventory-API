@@ -16,7 +16,6 @@ namespace Inventory_API.Data.Repositories
         Task<IEnumerable<Item>> GetAll(string username);
         Task<IEnumerable<Item>> GetAll(int roomId);
         Task<IEnumerable<Item>> GetAllRecursive(int roomId);
-
         Task<Item> Put(Item item);
     }
 
@@ -36,14 +35,10 @@ namespace Inventory_API.Data.Repositories
 
             return item;
         }
-        public async Task<Item> Get(int id, ICollection<string> usernames)
-        {
-            return await _restContext.Items.Include(x => x.Room).ThenInclude(x=> x.SharedWith).Include(x => x.Items).Include(x => x.Category).FirstOrDefaultAsync(x => x.Id == id && usernames.Contains(x.Author.Username));
-        }
 
         public async Task<Item> Get(int id, string username)
         {
-            return await _restContext.Items.Include(x => x.Room).ThenInclude(x => x.SharedWith).Include(x => x.Items).Include(x=> x.Category).FirstOrDefaultAsync(x => x.Id == id && x.Author.Username == username);
+            return await _restContext.Items.Include(x => x.Room).ThenInclude(x => x.SharedWith).Include(x => x.Items).Include(x=> x.Category).FirstOrDefaultAsync(x => x.Id == id && x.Room.SharedWith.Any(y => y.Username == username));
         }
 
         public async Task<Item> Get(int id)
@@ -53,7 +48,7 @@ namespace Inventory_API.Data.Repositories
 
         public async Task<IEnumerable<Item>> GetAll(string username)
         {
-            return await _restContext.Items.Include(x => x.Room).ThenInclude(x => x.SharedWith).Include(x => x.Items).Include(x => x.Category).Where(x => x.Author.Username == username).ToListAsync();
+            return await _restContext.Items.Include(x => x.Room).ThenInclude(x => x.SharedWith).Include(x => x.Items).Include(x => x.Category).Where(x => x.Room.SharedWith.Any(y => y.Username == username)).ToListAsync();
         }
 
         public async Task<IEnumerable<Item>> GetAllRecursive(int roomId)
