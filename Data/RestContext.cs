@@ -18,6 +18,8 @@ namespace Inventory_API.Data
         public DbSet<Room> Rooms { get; set; }
         public DbSet<Category> Categories { get; set; }
         public DbSet<ListItem> ListItems { get; set; }
+        public DbSet<Message> Messages { get; set; }
+        public DbSet<Reminder> Reminders { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

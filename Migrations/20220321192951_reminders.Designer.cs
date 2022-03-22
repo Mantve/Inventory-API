@@ -4,14 +4,16 @@ using Inventory_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Inventory_API.Migrations
 {
     [DbContext(typeof(RestContext))]
-    partial class RestContextModelSnapshot : ModelSnapshot
+    [Migration("20220321192951_reminders")]
+    partial class reminders
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -177,6 +179,9 @@ namespace Inventory_API.Migrations
 
                     b.Property<DateTime>("ReminderTime")
                         .HasColumnType("datetime2");
+
+                    b.Property<bool>("Repeat")
+                        .HasColumnType("bit");
 
                     b.Property<int>("RepeatFrequency")
                         .HasColumnType("int");

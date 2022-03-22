@@ -35,6 +35,8 @@ namespace Inventory_API
             services.AddTransient<ICategoryRepository, CategoryRepository>();
             services.AddTransient<IItemRepository, ItemRepository>();
             services.AddTransient<IListRepository, ListRepository>();
+            services.AddTransient<IReminderRepository, ReminderRepository>();
+            services.AddTransient<IMessageRepository, MessageRepository>();
             services.AddTransient<JwtService>();
             services.AddAuthentication(options =>
             {
