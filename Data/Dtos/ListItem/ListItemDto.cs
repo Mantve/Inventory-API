@@ -7,6 +7,10 @@ using System.Threading.Tasks;
 
 namespace Inventory_API.Data.Dtos.ListItem
 {
-    public record ListItemDto(int Id, ItemDto Item, ListDto ParentList, bool Completed);
+    public record ListItemDto(
+        int Id,
+        ItemDto Item,
+        BareListDto ParentList,
+        bool Completed);
 
 }

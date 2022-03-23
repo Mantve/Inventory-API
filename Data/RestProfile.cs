@@ -21,6 +21,7 @@ namespace Inventory_API.Data
             CreateMap<UpdateRoomDto, Room>();
             CreateMap<Room, RoomDto>();
             CreateMap<List, ListDto>();
+            CreateMap<List, BareListDto>();
             CreateMap<CreateListDto, List>();
             CreateMap<UpdateListDto, List>();
             CreateMap<Message, MessageDto>();

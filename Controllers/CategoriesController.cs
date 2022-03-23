@@ -49,7 +49,7 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<CategoryDto>> Post(CreateCategoryDto dto)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            User user = await _userRepository.GetByUsername(username);
+            User user = await _userRepository.GetFriends(username);
             if (user == null) return NotFound($"User with username '{username}' not found.");
             Category category = _mapper.Map<Category>(dto);
             category.Author = user;
