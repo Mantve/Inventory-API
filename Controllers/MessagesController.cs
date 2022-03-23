@@ -35,6 +35,22 @@ namespace Inventory_API.Controllers
         }
 
         [Authorize]
+        [HttpGet("sent")]
+        public async Task<IEnumerable<MessageDto>> GetAllSent()
+        {
+            string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+            return (await _messageRepository.GetAllCreated(username)).Select(o => _mapper.Map<MessageDto>(o));
+        }
+
+        [Authorize]
+        [HttpGet("type/{type}")]
+        public async Task<IEnumerable<MessageDto>> GetAllType(MessageType type)
+        {
+            string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+            return (await _messageRepository.GetAllType(username,type)).Select(o => _mapper.Map<MessageDto>(o));
+        }
+
+        [Authorize]
         [HttpGet("{id}")]
         public async Task<ActionResult<MessageDto>> Get(int id)
         {
@@ -50,10 +66,13 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<MessageDto>> Post(CreateMessageDto dto)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            User user = await _userRepository.GetByUsername(username);
-            if (user == null) return NotFound($"User with username '{username}' not found.");
+            User author = await _userRepository.GetByUsername(username);
+            if (author == null) return NotFound($"User with username '{username}' not found.");
+            User recipient = await _userRepository.GetByUsername(dto.RecipientName);
+            if (recipient == null) return NotFound($"User with username '{username}' not found.");
             Message message = _mapper.Map<Message>(dto);
-            message.Author = user;
+            message.Author = author;
+            message.Recipient = recipient;
             message = await _messageRepository.Create(message);
             return Created(string.Format("/api/message/{0}", message.Id), _mapper.Map<MessageDto>(message));
         }

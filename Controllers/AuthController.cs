@@ -7,6 +7,9 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace Inventory_API.Controllers
@@ -42,7 +45,9 @@ namespace Inventory_API.Controllers
                 Role = "Unverified"
             };
 
-            return Created("success", _repository.Create(user));
+            user = _repository.Create(user).Result;
+            return Created("success", _mapper.Map<UserDto>(user));
+        
         }
 
         [AllowAnonymous]
@@ -77,11 +82,7 @@ namespace Inventory_API.Controllers
         {
             try
             {
-                var jwt = Request.Cookies["jwt"];
-
-                var token = _jwtService.Verify(jwt);
-
-                string username = token.Issuer;
+                string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
 
                 var user = await _repository.GetByUsername(username);
 
@@ -100,15 +101,29 @@ namespace Inventory_API.Controllers
         {
             try
             {
-                var jwt = Request.Cookies["jwt"];
-
-                var token = _jwtService.Verify(jwt);
-
-                string username = token.Issuer;
+                string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
 
                 var user = await _repository.GetByUsername(username);
 
                 return Ok(_mapper.Map<DetailedUserDto>(user));
+            }
+            catch (Exception)
+            {
+                return Unauthorized();
+            }
+        }
+
+        [Authorize]
+        [HttpGet("friends")]
+        public async Task<ActionResult<IEnumerable<DetailedUserDto>>> FriendsInfo()
+        {
+            try
+            {
+                string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
+                var user = await _repository.GetFriends(username);
+
+                return Ok(user.Friends.Select(o => _mapper.Map<DetailedUserDto>(o)));
             }
             catch (Exception)
             {

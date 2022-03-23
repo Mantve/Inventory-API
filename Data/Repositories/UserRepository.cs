@@ -7,48 +7,35 @@ using System.Threading.Tasks;
 namespace Inventory_API.Data.Repositories
 {
 
-    public interface IUserRepository
+    public interface IUserRepository : IGenericRepository<User>
+    {
+        Task<User> GetByUsername(string username);
+        Task<User> GetFriends(string username);
+        Task<IEnumerable<User>> GetByRole(string role);
+    }
+
+    public class UserRepository : GenericRepository<User>, IUserRepository
+    {
+
+        public UserRepository(RestContext restContext) : base(restContext)
         {
-            Task<User> Create(User user);
-            Task<User> GetByUsername(string username);
-            Task<User> Put(User user);
-            Task<IEnumerable<User>> GetByRole(string role);
+            _restContext = restContext;
         }
 
-        public class UserRepository : IUserRepository
+        public async Task<User> GetByUsername(string username)
         {
-            private readonly RestContext _restContext;
-
-            public UserRepository(RestContext restContext)
-            {
-                _restContext = restContext;
-            }
-
-            public async Task<User> Create(User user)
-            {
-                _restContext.Users.Add(user);
-                await _restContext.SaveChangesAsync();
-
-                return user;
-            }
-
-            public async Task<User> GetByUsername(string username)
-            {
-                return await _restContext.Users.FirstOrDefaultAsync(u => u.Username == username);
-            }
-
-
-            public async Task<User> Put(User user)
-            {
-                _restContext.Users.Update(user);
-                await _restContext.SaveChangesAsync();
-                return user;
-            }
-
-            public async Task<IEnumerable<User>> GetByRole(string role)
-            {
-                return await _restContext.Users.Where(o => o.Role == role || role == null).ToListAsync();
-            }
+            return await _restContext.Users.FirstOrDefaultAsync(u => u.Username == username);
         }
-    
+
+        public async Task<User> GetFriends(string username)
+        {
+            return await _restContext.Users.Include(x => x.Friends).FirstOrDefaultAsync(u => u.Username == username);
+        }
+
+        public async Task<IEnumerable<User>> GetByRole(string role)
+        {
+            return await _restContext.Users.Where(o => o.Role == role || role == null).ToListAsync();
+        }
+    }
+
 }

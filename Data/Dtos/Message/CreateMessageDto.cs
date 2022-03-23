@@ -5,8 +5,7 @@ using System.ComponentModel.DataAnnotations;
 namespace Inventory_API.Data.Dtos.Message
 {
     public record CreateMessageDto(
-        [Required()] int? RecipientId,
-        [Required()] int? AuthorId,
+        [Required()] string RecipientName,
         string Contents,
         [Required()] MessageType MessageType);
 }

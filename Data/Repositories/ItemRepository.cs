@@ -6,34 +6,22 @@ using System.Threading.Tasks;
 
 namespace Inventory_API.Data.Repositories
 {
-    public interface IItemRepository
+    public interface IItemRepository : IGenericRepository<Item>
     {
-        Task<Item> Create(Item item);
-        Task Delete(Item item);
         Task<Item> Get(int id, string username);
         Task<Item> Get(int id);
         Task<Item> GetParent(Item item);
         Task<IEnumerable<Item>> GetAll(string username);
         Task<IEnumerable<Item>> GetAll(int roomId);
         Task<IEnumerable<Item>> GetAllRecursive(int roomId);
-        Task<Item> Put(Item item);
     }
 
-    public class ItemRepository : IItemRepository
+    public class ItemRepository : GenericRepository<Item>, IItemRepository
     {
-        private readonly RestContext _restContext;
 
-        public ItemRepository(RestContext restContext)
+        public ItemRepository(RestContext restContext) : base(restContext)
         {
             _restContext = restContext;
-        }
-
-        public async Task<Item> Create(Item item)
-        {
-            _restContext.Items.Add(item);
-            await _restContext.SaveChangesAsync();
-
-            return item;
         }
 
         public async Task<Item> Get(int id, string username)
@@ -66,17 +54,5 @@ namespace Inventory_API.Data.Repositories
             return await _restContext.Items.Include(x => x.ParentItem).Include(x => x.Category).Include(x => x.Room).ThenInclude(x => x.SharedWith).Include(x => x.Items).Include(x => x.Category).FirstOrDefaultAsync(x => x.Items.Contains(item));
         }
 
-        public async Task<Item> Put(Item item)
-        {
-            _restContext.Items.Update(item);
-            await _restContext.SaveChangesAsync();
-            return item;
-        }
-
-        public async Task Delete(Item item)
-        {
-            _restContext.Items.Remove(item);
-            await _restContext.SaveChangesAsync();
-        }
     }
 }

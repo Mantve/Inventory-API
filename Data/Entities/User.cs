@@ -8,12 +8,11 @@ namespace Inventory_API.Data.Entities
     public class User
     {
         [Key]
-        public string Username { get; set; }
-        [JsonIgnore] public string Password { get; set; }
+        [MaxLength(32)] [Required] public string Username { get; set; }
+        [Required] [JsonIgnore] public string Password { get; set; }
         public string Role { get; set; }
         public ICollection<User> Friends { get; set; }
-        [InverseProperty("Author")]
-        public ICollection<Room> Rooms { get; set; }
+        [InverseProperty("Author")] public ICollection<Room> Rooms { get; set; }
         public ICollection<List> Lists { get; set; }
     }
 }

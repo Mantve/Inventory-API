@@ -31,7 +31,7 @@ namespace Inventory_API.Controllers
         public async Task<IEnumerable<CategoryDto>> GetAll()
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            return (await _categoryRepository.GetAll(username)).Select(o => _mapper.Map<CategoryDto>(o));
+            return (await _categoryRepository.GetAll(x => x.Author.Username == username)).Select(o => _mapper.Map<CategoryDto>(o));
         }
 
         [Authorize]
@@ -39,9 +39,8 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<CategoryDto>> Get(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            Category category = await _categoryRepository.Get(id, username);
+            Category category = await _categoryRepository.Get(x => x.Id == id && x.Author.Username == username);
             if (category == null) return NotFound($"Category with id '{id}' not found.");
-
             return Ok(_mapper.Map<CategoryDto>(category));
         }
 
@@ -63,7 +62,7 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<CategoryDto>> Put(int id, UpdateCategoryDto dto)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            Category category = await _categoryRepository.Get(id, username);
+            Category category = await _categoryRepository.Get(x => x.Id == id && x.Author.Username == username);
             if (category == null)
                 return NotFound("Category not found");
             _mapper.Map(dto, category);
@@ -76,7 +75,7 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<CategoryDto>> Delete(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            Category category = await _categoryRepository.Get(id, username);
+            Category category = await _categoryRepository.Get(x => x.Id == id && x.Author.Username == username);
             if (category == null)
                 return NotFound("Category not found");
             await _categoryRepository.Delete(category);

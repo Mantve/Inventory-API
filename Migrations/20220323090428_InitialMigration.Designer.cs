@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Inventory_API.Migrations
 {
     [DbContext(typeof(RestContext))]
-    [Migration("20220320185912_ParentItem")]
-    partial class ParentItem
+    [Migration("20220323090428_InitialMigration")]
+    partial class InitialMigration
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -29,10 +29,16 @@ namespace Inventory_API.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("AuthorUsername")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.HasKey("Id");
 
@@ -49,22 +55,22 @@ namespace Inventory_API.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("AuthorUsername")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
                     b.Property<string>("Comments")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
 
                     b.Property<int>("Level")
                         .HasColumnType("int");
 
-                    b.Property<int?>("ListId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<int?>("ParentItemId")
                         .HasColumnType("int");
@@ -72,7 +78,7 @@ namespace Inventory_API.Migrations
                     b.Property<float>("Quantity")
                         .HasColumnType("real");
 
-                    b.Property<int?>("RoomId")
+                    b.Property<int>("RoomId")
                         .HasColumnType("int");
 
                     b.Property<decimal>("Value")
@@ -83,8 +89,6 @@ namespace Inventory_API.Migrations
                     b.HasIndex("AuthorUsername");
 
                     b.HasIndex("CategoryId");
-
-                    b.HasIndex("ListId");
 
                     b.HasIndex("ParentItemId");
 
@@ -100,17 +104,106 @@ namespace Inventory_API.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<string>("AuthorUsername")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
 
-                    b.Property<string>("Username")
-                        .HasColumnType("nvarchar(450)");
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Username");
+                    b.HasIndex("AuthorUsername");
 
                     b.ToTable("Lists");
+                });
+
+            modelBuilder.Entity("Inventory_API.Data.Entities.ListItem", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<bool>("Completed")
+                        .HasColumnType("bit");
+
+                    b.Property<int?>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("ParentListId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ItemId");
+
+                    b.HasIndex("ParentListId");
+
+                    b.ToTable("ListItems");
+                });
+
+            modelBuilder.Entity("Inventory_API.Data.Entities.Message", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("AuthorUsername")
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<string>("Contents")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<int>("MessageType")
+                        .HasColumnType("int");
+
+                    b.Property<string>("RecipientUsername")
+                        .HasColumnType("nvarchar(32)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorUsername");
+
+                    b.HasIndex("RecipientUsername");
+
+                    b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("Inventory_API.Data.Entities.Reminder", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int")
+                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+
+                    b.Property<string>("AuthorUsername")
+                        .HasColumnType("nvarchar(32)");
+
+                    b.Property<int?>("ItemId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTime>("ReminderTime")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("RepeatFrequency")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorUsername");
+
+                    b.HasIndex("ItemId");
+
+                    b.ToTable("Reminders");
                 });
 
             modelBuilder.Entity("Inventory_API.Data.Entities.Room", b =>
@@ -121,10 +214,13 @@ namespace Inventory_API.Migrations
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
                     b.Property<string>("AuthorUsername")
-                        .HasColumnType("nvarchar(450)");
+                        .IsRequired()
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<string>("Name")
-                        .HasColumnType("nvarchar(max)");
+                        .IsRequired()
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.HasKey("Id");
 
@@ -136,9 +232,11 @@ namespace Inventory_API.Migrations
             modelBuilder.Entity("Inventory_API.Data.Entities.User", b =>
                 {
                     b.Property<string>("Username")
-                        .HasColumnType("nvarchar(450)");
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.Property<string>("Password")
+                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Role")
@@ -148,7 +246,7 @@ namespace Inventory_API.Migrations
                         .HasColumnType("int");
 
                     b.Property<string>("Username1")
-                        .HasColumnType("nvarchar(450)");
+                        .HasColumnType("nvarchar(32)");
 
                     b.HasKey("Username");
 
@@ -181,17 +279,15 @@ namespace Inventory_API.Migrations
                         .WithMany()
                         .HasForeignKey("CategoryId");
 
-                    b.HasOne("Inventory_API.Data.Entities.List", null)
-                        .WithMany("Items")
-                        .HasForeignKey("ListId");
-
                     b.HasOne("Inventory_API.Data.Entities.Item", "ParentItem")
                         .WithMany("Items")
                         .HasForeignKey("ParentItemId");
 
                     b.HasOne("Inventory_API.Data.Entities.Room", "Room")
                         .WithMany("Items")
-                        .HasForeignKey("RoomId");
+                        .HasForeignKey("RoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Author");
 
@@ -204,16 +300,69 @@ namespace Inventory_API.Migrations
 
             modelBuilder.Entity("Inventory_API.Data.Entities.List", b =>
                 {
-                    b.HasOne("Inventory_API.Data.Entities.User", null)
+                    b.HasOne("Inventory_API.Data.Entities.User", "Author")
                         .WithMany("Lists")
-                        .HasForeignKey("Username");
+                        .HasForeignKey("AuthorUsername")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+                });
+
+            modelBuilder.Entity("Inventory_API.Data.Entities.ListItem", b =>
+                {
+                    b.HasOne("Inventory_API.Data.Entities.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId");
+
+                    b.HasOne("Inventory_API.Data.Entities.List", "ParentList")
+                        .WithMany("Items")
+                        .HasForeignKey("ParentListId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Item");
+
+                    b.Navigation("ParentList");
+                });
+
+            modelBuilder.Entity("Inventory_API.Data.Entities.Message", b =>
+                {
+                    b.HasOne("Inventory_API.Data.Entities.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorUsername");
+
+                    b.HasOne("Inventory_API.Data.Entities.User", "Recipient")
+                        .WithMany()
+                        .HasForeignKey("RecipientUsername");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Recipient");
+                });
+
+            modelBuilder.Entity("Inventory_API.Data.Entities.Reminder", b =>
+                {
+                    b.HasOne("Inventory_API.Data.Entities.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorUsername");
+
+                    b.HasOne("Inventory_API.Data.Entities.Item", "Item")
+                        .WithMany()
+                        .HasForeignKey("ItemId");
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Item");
                 });
 
             modelBuilder.Entity("Inventory_API.Data.Entities.Room", b =>
                 {
                     b.HasOne("Inventory_API.Data.Entities.User", "Author")
                         .WithMany("Rooms")
-                        .HasForeignKey("AuthorUsername");
+                        .HasForeignKey("AuthorUsername")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Author");
                 });

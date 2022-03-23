@@ -88,7 +88,7 @@ namespace Inventory_API.Controllers
             Room room = await _roomRepository.Get(dto.RoomId, username);
             if(room==null) return NotFound($"Room with id'{dto.RoomId}' not found.");
 
-            Category category = await _categoryRepository.Get(dto.CategoryId, username);
+            Category category = await _categoryRepository.Get(x => x.Id == dto.CategoryId && x.Author.Username == username);
             item.Category = category;
             item.Author = user;
             item.Room = room;

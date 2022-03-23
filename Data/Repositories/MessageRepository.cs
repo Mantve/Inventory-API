@@ -6,53 +6,47 @@ using System.Threading.Tasks;
 
 namespace Inventory_API.Data.Repositories
 {
-    public interface IMessageRepository
+    public interface IMessageRepository : IGenericRepository<Message>
     {
-        Task<Message> Create(Message message);
-        Task Delete(Message message);
         Task<Message> Get(int id, string username);
         Task<IEnumerable<Message>> GetAll(string username);
-        Task<Message> Put(Message message);
+        Task<IEnumerable<Message>> GetAllCreated(string username);
+        Task<IEnumerable<Message>> GetAllType(string username, MessageType messageType);
+        Task<Message> GetCreated(int id, string username);
     }
 
-    public class MessageRepository : IMessageRepository
+    public class MessageRepository : GenericRepository<Message>, IMessageRepository
     {
-        private readonly RestContext _restContext;
 
-        public MessageRepository(RestContext restContext)
+        public MessageRepository(RestContext restContext) : base(restContext)
         {
             _restContext = restContext;
         }
 
-        public async Task<Message> Create(Message message)
-        {
-            _restContext.Messages.Add(message);
-            await _restContext.SaveChangesAsync();
-
-            return message;
-        }
-
-        public async Task<Message> Get(int id, string username)
+        public async Task<Message> GetCreated(int id, string username)
         {
             return await _restContext.Messages.FirstOrDefaultAsync(x => x.Id == id && x.Author.Username == username);
         }
 
-        public async Task<IEnumerable<Message>> GetAll(string username)
+        public async Task<IEnumerable<Message>> GetAllCreated(string username)
         {
             return await _restContext.Messages.Where(x => x.Author.Username == username).ToListAsync();
         }
 
-        public async Task<Message> Put(Message message)
+        public async Task<Message> Get(int id, string username)
         {
-            _restContext.Messages.Update(message);
-            await _restContext.SaveChangesAsync();
-            return message;
+            return await _restContext.Messages.Include(x => x.Author).FirstOrDefaultAsync(x => x.Id == id && x.Recipient.Username == username);
         }
 
-        public async Task Delete(Message message)
+        public async Task<IEnumerable<Message>> GetAll(string username)
         {
-            _restContext.Messages.Remove(message);
-            await _restContext.SaveChangesAsync();
+            return await _restContext.Messages.Include(x => x.Author).Where(x => x.Recipient.Username == username).ToListAsync();
         }
+
+        public async Task<IEnumerable<Message>> GetAllType(string username, MessageType messageType)
+        {
+            return await _restContext.Messages.Include(x=> x.Author).Where(x => x.Recipient.Username == username && x.MessageType == messageType).ToListAsync();
+        }
+
     }
 }
