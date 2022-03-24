@@ -1,4 +1,5 @@
-﻿using Inventory_API.Data.Dtos.Item;
+﻿
+using Inventory_API.Data.Dtos.Item;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;

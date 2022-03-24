@@ -40,6 +40,7 @@ namespace Inventory_API.Data
             CreateMap<UpdateItemDto, Item>();
             CreateMap<Item, ItemDto>();
             CreateMap<Item, RecursiveItemDto>();
+            CreateMap<Item, ParentlessItemDto>();
 
         }
     }

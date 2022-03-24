@@ -17,11 +17,13 @@ namespace Inventory_API.Controllers
     {
         private readonly IReminderRepository _reminderRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IItemRepository _itemRepository;
         private readonly IMapper _mapper;
 
-        public RemindersController(IReminderRepository reminderRepository, IUserRepository userRepository, IMapper mapper)
+        public RemindersController(IReminderRepository reminderRepository, IItemRepository itemRepository, IUserRepository userRepository, IMapper mapper)
         {
             _reminderRepository = reminderRepository;
+            _itemRepository = itemRepository;
             _userRepository = userRepository;
             _mapper = mapper;
         }
@@ -52,8 +54,11 @@ namespace Inventory_API.Controllers
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
             User user = await _userRepository.GetByUsername(username);
             if (user == null) return NotFound($"User with username '{username}' not found.");
+            Item item = await _itemRepository.Get((int)dto.ItemId,username);
+            if (item == null) return NotFound($"Item with id '{dto.ItemId}' not found.");
             Reminder reminder = _mapper.Map<Reminder>(dto);
             reminder.Author = user;
+            reminder.Item = item;
             reminder = await _reminderRepository.Create(reminder);
             return Created(string.Format("/api/reminder/{0}", reminder.Id), _mapper.Map<ReminderDto>(reminder));
         }

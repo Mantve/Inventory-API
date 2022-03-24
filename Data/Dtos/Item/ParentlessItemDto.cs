@@ -1,19 +1,19 @@
 ﻿using Inventory_API.Data.Dtos.Category;
 using Inventory_API.Data.Dtos.Room;
+using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Inventory_API.Data.Dtos.Item
 {
-    public record RecursiveItemDto(
+    public record ParentlessItemDto(
         int Id,
-        string Name, 
+        string Name,
         float Quantity,
         decimal Value,
+        CategoryDto Category,
         string Comments,
         RoomDto Room,
-        CategoryDto Category, 
-        List<RecursiveItemDto> Items,
-        int Level,
-        ParentlessItemDto ParentItem );
-
+        int Level);
 }

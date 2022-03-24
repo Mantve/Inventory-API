@@ -68,8 +68,10 @@ namespace Inventory_API.Controllers
 
             Response.Cookies.Append("jwt", jwt, new CookieOptions
             {
-                HttpOnly = false
-            });
+                HttpOnly = false,
+                Secure = true,
+                SameSite = SameSiteMode.None
+            });;
 
             return Ok(new
             {

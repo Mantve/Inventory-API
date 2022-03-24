@@ -12,5 +12,5 @@ namespace Inventory_API.Data.Dtos.Item
         string Comments,
         RoomDto Room,
         int Level,
-        ItemDto ParentItem);
+        ParentlessItemDto ParentItem);
 }
