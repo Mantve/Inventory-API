@@ -53,7 +53,7 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<RecursiveItemDto>> GetRecursive(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            Item item = await _itemRepository.Get(id);
+            Item item = await _itemRepository.GetRecursive(id);
             if (item == null || !item.Room.SharedWith.Any(x => x.Username == username)) return NotFound($"Item with id '{id}' not found.");
 
             return Ok(_mapper.Map<RecursiveItemDto>(item));
@@ -109,6 +109,8 @@ namespace Inventory_API.Controllers
             Item item = await _itemRepository.Get(id);
             if (item == null || !item.Room.SharedWith.Any(x => x.Username == username))
                 return NotFound("Item not found");
+            Category category = await _categoryRepository.Get(x => x.Id == dto.CategoryId && x.Author.Username == username);
+            if (category == null ) return NotFound($"Category not found");
             Item parentItem = await _itemRepository.GetParent(item);
             if (parentItem != null && parentItem.Id != dto.ParentItemId)
             {
@@ -122,6 +124,7 @@ namespace Inventory_API.Controllers
                 if (newParentItem == null || !item.Room.SharedWith.Any(x => x.Username == username)) return NotFound($"Parent item not found");
             }
             _mapper.Map(dto, item);
+            item.Category = category;
             await _itemRepository.Put(item);
             if (newParentItem != null)
             {

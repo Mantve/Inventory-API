@@ -10,6 +10,7 @@ namespace Inventory_API.Data.Repositories
     {
         Task<Item> Get(int id, string username);
         Task<Item> Get(int id);
+        Task<Item> GetRecursive(int id);
         Task<Item> GetParent(Item item);
         Task<IEnumerable<Item>> GetAll(string username);
         Task<IEnumerable<Item>> GetAll(int roomId);
@@ -26,32 +27,99 @@ namespace Inventory_API.Data.Repositories
 
         public async Task<Item> Get(int id, string username)
         {
-            return await _restContext.Items.Include(x => x.Room).ThenInclude(x => x.SharedWith).Include(x => x.Items).Include(x=> x.Category).FirstOrDefaultAsync(x => x.Id == id && x.Room.SharedWith.Any(y => y.Username == username));
+            return await _restContext.Items
+                .Include(x => x.Room)
+                    .ThenInclude(x => x.SharedWith)
+                .Include(x => x.Items)
+                    .ThenInclude(x => x.Category)
+                .Include(x => x.Category)
+                .FirstOrDefaultAsync(x => x.Id == id && x.Room.SharedWith.Any(y => y.Username == username));
         }
 
         public async Task<Item> Get(int id)
         {
-            return await _restContext.Items.Include(x=>x.ParentItem).Include(x => x.Room).ThenInclude(x => x.SharedWith).Include(x=>x.Items).ThenInclude(x => x.Items).ThenInclude(x => x.Items).ThenInclude(x => x.Items).ThenInclude(x => x.Items).Include(x => x.Category).FirstOrDefaultAsync(x => x.Id == id);
+            return await _restContext.Items
+                .Include(x => x.ParentItem)
+                .Include(x => x.Room)
+                    .ThenInclude(x => x.SharedWith)
+                .Include(x => x.Items)
+                    .ThenInclude(x => x.Items)
+                        .ThenInclude(x => x.Items)
+                            .ThenInclude(x => x.Items)
+                                .ThenInclude(x => x.Items)
+                .Include(x => x.Category)
+                .FirstOrDefaultAsync(x => x.Id == id);
+        }
+
+        public async Task<Item> GetRecursive(int id)
+        {
+            var items = await _restContext.Items
+                .Include(x => x.ParentItem)
+                .Include(x => x.Room)
+                    .ThenInclude(x => x.SharedWith)
+                .Include(x => x.Items)
+                    .ThenInclude(x => x.Items)
+                        .ThenInclude(x => x.Items)
+                            .ThenInclude(x => x.Items)
+                                .ThenInclude(x => x.Items)
+                .Include(x => x.Category)
+                .FirstOrDefaultAsync(x => x.Id == id);
+            foreach (var item in items.Items)
+            {
+                item.Items = GetRecursive(item.Id).Result.Items;
+            }
+            return items;
         }
 
         public async Task<IEnumerable<Item>> GetAll(string username)
         {
-            return await _restContext.Items.Include(x => x.Room).ThenInclude(x => x.SharedWith).Include(x => x.Items).Include(x => x.Category).Where(x => x.Room.SharedWith.Any(y => y.Username == username)).ToListAsync();
+            return await _restContext.Items
+                .Include(x => x.Room)
+                    .ThenInclude(x => x.SharedWith)
+                .Include(x => x.Items)
+                .Include(x => x.Category)
+                .Where(x => x.Room.SharedWith.Any(y => y.Username == username)).ToListAsync();
         }
 
         public async Task<IEnumerable<Item>> GetAllRecursive(int roomId)
         {
-            return await _restContext.Items.Include(x => x.ParentItem).Include(x => x.Category).Include(x => x.Room).ThenInclude(x => x.SharedWith).Include(x => x.Items).ThenInclude(x => x.Items).ThenInclude(x => x.Items).ThenInclude(x => x.Items).ThenInclude(x => x.Items).Include(x=> x.Category).Where(x => x.Room.Id == roomId && _restContext.Items.Where(y=>y.Items.Contains(x)).ToList().Count == 0).ToListAsync();
+            var items = await _restContext.Items
+                .Include(x => x.ParentItem)
+                .Include(x => x.Category)
+                .Include(x => x.Room)
+                    .ThenInclude(x => x.SharedWith)
+                .Include(x => x.Items)
+                    .ThenInclude(x => x.Category)
+                .Include(x => x.Category)
+                .Where(x => x.Room.Id == roomId && _restContext.Items.Where(y => y.Items.Contains(x)).ToList().Count == 0).ToListAsync();
+            foreach (var item in items)
+            {
+                item.Items = GetRecursive(item.Id).Result.Items;
+            }
+            return items;
         }
 
         public async Task<IEnumerable<Item>> GetAll(int roomId)
         {
-            return await _restContext.Items.Include(x => x.ParentItem).Include(x => x.Category).Include(x => x.Room).ThenInclude(x => x.SharedWith).Include(x => x.Category).Where(x => x.Room.Id == roomId).ToListAsync();
+            return await _restContext.Items
+                .Include(x => x.ParentItem)
+                .Include(x => x.Category)
+                .Include(x => x.Room)
+                    .ThenInclude(x => x.SharedWith)
+                .Include(x => x.Category)
+                .Where(x => x.Room.Id == roomId).ToListAsync();
         }
 
         public async Task<Item> GetParent(Item item)
         {
-            return await _restContext.Items.Include(x => x.ParentItem).Include(x => x.Category).Include(x => x.Room).ThenInclude(x => x.SharedWith).Include(x => x.Items).Include(x => x.Category).FirstOrDefaultAsync(x => x.Items.Contains(item));
+            return await _restContext.Items
+                .Include(x => x.ParentItem)
+                .Include(x => x.Category)
+                .Include(x => x.Room)
+                    .ThenInclude(x => x.SharedWith)
+                .Include(x => x.Items)
+                .Include(x => x.Category)
+                .FirstOrDefaultAsync(x => x.Items.Contains(item));
         }
 
     }
