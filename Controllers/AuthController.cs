@@ -68,15 +68,12 @@ namespace Inventory_API.Controllers
 
             Response.Cookies.Append("jwt", jwt, new CookieOptions
             {
-                HttpOnly = false,
+                HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None
             });;
 
-            return Ok(new
-            {
-                message = "success"
-            });
+            return Ok(_mapper.Map<UserDto>(user));
         }
 
         [Authorize]
