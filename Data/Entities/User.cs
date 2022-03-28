@@ -11,6 +11,7 @@ namespace Inventory_API.Data.Entities
         [Required] [JsonIgnore] public string Password { get; set; }
         public string Role { get; set; }
         public ICollection<User> Friends { get; set; }
+        public ICollection<User> FriendOf { get; set; }
         [InverseProperty("Author")] public ICollection<Room> CreatedRooms { get; set; }
         [InverseProperty("SharedWith")] public ICollection<Room> AccessibleRooms { get; set; }
         public ICollection<List> Lists { get; set; }

@@ -84,19 +84,23 @@ namespace Inventory_API.Controllers
                 return NotFound($"User with username '{username}' not found.");
             }
 
-            User recipient = await _userRepository.GetByUsername(dto.RecipientName);
-            if (recipient == null)
-            {
-                return NotFound($"User with username '{username}' not found.");
-            }
-
             if (dto.MessageType == MessageType.FriendRequest)
             {
-                IEnumerable<Message> previousMessages = await _messageRepository.GetAll(author.Username, recipient.Username, dto.MessageType);
+                if(author.Friends.Any(x=> x.Username == dto.RecipientName))
+                {
+                    return ValidationProblem("You are already friends with that user");
+                }
+                IEnumerable<Message> previousMessages = await _messageRepository.GetAll(author.Username, dto.RecipientName, dto.MessageType);
                 if (previousMessages.Any())
                 {
                     return ValidationProblem("Friend request is already sent to that user");
                 }
+            }
+
+            User recipient = await _userRepository.GetByUsername(dto.RecipientName);
+            if (recipient == null)
+            {
+                return NotFound($"User with username '{username}' not found.");
             }
 
             Message message = _mapper.Map<Message>(dto);

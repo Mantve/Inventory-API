@@ -143,18 +143,53 @@ namespace Inventory_API.Controllers
             }
 
             var res = await AddFriend(user, author);
-            if (res != Ok() )
+            if (res is not OkResult)
             {
                 return res;
             }
-            res = await AddFriend(author,user);
-            if (res != Ok())
+            res = await AddFriend(author, user);
+            if (res is not OkResult)
             {
-                await RemoveFriend(user, author);
+                await RemoveFriend(author, user);
                 return res;
             }
 
             await _messageRepository.Delete(message);
+
+            return Ok(user.Friends.Select(o => _mapper.Map<DetailedUserDto>(o)));
+        }
+
+
+        [Authorize]
+        [HttpDelete("friends/{friendUsername}")]
+        public async Task<ActionResult<DetailedUserDto>> Unfriend(string friendUsername)
+        {
+            string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
+            User user = await _userRepository.GetByUsername(username);
+            if (user == null)
+            {
+                return NotFound($"User with username '{username}' not found.");
+            }
+
+            User friend = await _userRepository.GetByUsername(friendUsername);
+            if (friend == null)
+            {
+                return NotFound($"User with username '{friend}' not found.");
+            }
+
+            var res = await RemoveFriend(user, friend);
+            if(res is not OkResult)
+            {
+                return res;
+            }
+            res = await RemoveFriend(friend, user);
+            if (res is not OkResult)
+            {
+                await AddFriend(user, friend);
+                return res;
+            }
+
             return Ok(user.Friends.Select(o => _mapper.Map<DetailedUserDto>(o)));
         }
 
@@ -169,23 +204,25 @@ namespace Inventory_API.Controllers
                 user.Friends = new List<User>();
             }
             user.Friends.Add(friend);
-            return Ok(await _userRepository.Put(friend));
+            await _userRepository.Put(friend);
+            return Ok();
         }
 
         private async Task<ActionResult> RemoveFriend(User user, User friend)
         {
-            User userFriend=null;
+            User userFriend = null;
             if (user.Friends != null)
             {
-                userFriend = user.Friends.FirstOrDefault(x => x.Username != friend.Username);
+                userFriend = user.Friends.FirstOrDefault(x => x.Username == friend.Username);
             }
-            if(userFriend==null)
+            if (userFriend == null)
             {
                 return ValidationProblem("User is not in the friends list");
             }
 
             user.Friends.Remove(friend);
-            return Ok(await _userRepository.Put(friend));
+            await _userRepository.Put(user);
+            return Ok();
         }
 
         [Authorize]

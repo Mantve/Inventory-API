@@ -63,6 +63,7 @@ namespace Inventory_API.Controllers
 
             Room room = _mapper.Map<Room>(dto);
             room.Author = user;
+            room.SharedWith = new List<User>() { user };
             room = await _roomRepository.Create(room);
             return Created(string.Format("/api/room/{0}", room.Id), _mapper.Map<RoomDto>(room));
         }
@@ -78,7 +79,7 @@ namespace Inventory_API.Controllers
                 return NotFound($"User with username '{username}' not found.");
             }
 
-            Room room= await _roomRepository.Get(id,username);
+            Room room = await _roomRepository.Get(id, username);
             if (room == null)
             {
                 return NotFound("Room not found");
@@ -106,5 +107,57 @@ namespace Inventory_API.Controllers
 
             return NoContent();
         }
+
+
+        [Authorize]
+        [HttpPut("{id}/share")]
+        public async Task<ActionResult<RoomDto>> Share(int id, RoomShareDto dto)
+        {
+            string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
+            if (username == dto.Username)
+            {
+                return ValidationProblem("You cannot adjust your own permissions");
+            }
+
+            User user = await _userRepository.GetByUsername(username);
+            if (user == null)
+            {
+                return NotFound($"User with username '{username}' not found.");
+            }
+
+            Room room = await _roomRepository.Get(id, username);
+            if (room == null)
+            {
+                return NotFound("Room not found");
+            }
+
+            if (dto.Shared && room.SharedWith.Any(x => x.Username == dto.Username))
+            {
+                return ValidationProblem("Room is already shared with this user");
+            }
+            if (!dto.Shared && !room.SharedWith.Any(x => x.Username == dto.Username))
+            {
+                return ValidationProblem("Room is not shared with this user");
+            }
+
+            User newUser = await _userRepository.GetByUsername(dto.Username);
+            if (newUser == null)
+            {
+                return NotFound($"User with username '{dto.Username}' not found.");
+            }
+
+            if (dto.Shared)
+            {
+                room.SharedWith.Add(newUser);
+            }
+            else
+            {
+                room.SharedWith.Remove(newUser);
+            }
+            room = await _roomRepository.Put(room);
+            return Created(string.Format("/api/room/{0}", room.Id), _mapper.Map<RoomDto>(room));
+        }
+
     }
 }
