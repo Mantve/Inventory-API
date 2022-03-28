@@ -178,7 +178,7 @@ namespace Inventory_API.Controllers
 
         [Authorize]
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ItemDto>> Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
 
@@ -196,7 +196,7 @@ namespace Inventory_API.Controllers
             return NoContent();
         }
 
-        public async Task<ActionResult<ItemDto>> Delete(Item item)
+        private async Task<ActionResult> Delete(Item item)
         {
             foreach (Item child in item.Items)
             {

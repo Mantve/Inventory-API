@@ -97,7 +97,7 @@ namespace Inventory_API.Controllers
 
         [Authorize]
         [HttpDelete("{id}")]
-        public async Task<ActionResult<ReminderDto>> Delete(int id)
+        public async Task<ActionResult> Delete(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
 

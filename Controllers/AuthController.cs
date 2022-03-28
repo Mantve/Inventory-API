@@ -158,7 +158,7 @@ namespace Inventory_API.Controllers
             return Ok(user.Friends.Select(o => _mapper.Map<DetailedUserDto>(o)));
         }
 
-        public async Task<ActionResult> AddFriend(User user, User friend)
+        private async Task<ActionResult> AddFriend(User user, User friend)
         {
             if (user.Friends != null && user.Friends.Any(x => x.Username == friend.Username))
             {
@@ -172,7 +172,7 @@ namespace Inventory_API.Controllers
             return Ok(await _userRepository.Put(friend));
         }
 
-        public async Task<ActionResult> RemoveFriend(User user, User friend)
+        private async Task<ActionResult> RemoveFriend(User user, User friend)
         {
             User userFriend=null;
             if (user.Friends != null)
