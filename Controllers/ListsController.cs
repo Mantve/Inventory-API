@@ -20,12 +20,10 @@ namespace Inventory_API.Controllers
 
         private readonly IListRepository _listRepository;
         private readonly IUserRepository _userRepository;
-        private readonly IItemRepository _itemRepository;
         private readonly IMapper _mapper;
 
-        public ListsController(IListRepository listRepository, IItemRepository itemRepository, IUserRepository userRepository, IMapper mapper)
+        public ListsController(IListRepository listRepository, IUserRepository userRepository, IMapper mapper)
         {
-            _itemRepository = itemRepository;
             _listRepository = listRepository;
             _userRepository = userRepository;
             _mapper = mapper;
@@ -36,6 +34,7 @@ namespace Inventory_API.Controllers
         public async Task<IEnumerable<ListDto>> GetAll()
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
             return (await _listRepository.GetAll(username)).Select(o => _mapper.Map<ListDto>(o));
         }
 
@@ -44,8 +43,12 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<ListDto>> Get(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
             List list = await _listRepository.Get(id, username);
-            if (list == null) return NotFound($"List with id '{id}' not found.");
+            if (list == null)
+            {
+                return NotFound($"List with id '{id}' not found.");
+            }
 
             return Ok(_mapper.Map<ListDto>(list));
         }
@@ -54,12 +57,17 @@ namespace Inventory_API.Controllers
         [HttpPost]
         public async Task<ActionResult<ListDto>> Post(CreateListDto dto)
         {
-            List list = _mapper.Map<List>(dto);
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
             User user = await _userRepository.GetByUsername(username);
-            if (user == null) return NotFound($"User with username '{username}' not found.");
+            if (user == null)
+            {
+                return NotFound($"User with username '{username}' not found.");
+            }
+
+            List list = _mapper.Map<List>(dto);
             list.Author = user;
             list = await _listRepository.Create(list);
+
             return Created(string.Format("/api/category/{0}", list.Id), _mapper.Map<ListDto>(list));
         }
 
@@ -68,11 +76,16 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<ListDto>> Put(int id, UpdateListDto dto)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
             List list = await _listRepository.Get(id, username);
             if (list == null)
+            {
                 return NotFound("List not found");
+            }
+
             _mapper.Map(dto, list);
             await _listRepository.Put(list);
+
             return Ok(_mapper.Map<ListDto>(list));
         }
 
@@ -81,10 +94,15 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<ListDto>> Delete(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
             List list = await _listRepository.Get(id, username);
             if (list == null)
+            {
                 return NotFound("List not found");
+            }
+
             await _listRepository.Delete(list);
+
             return NoContent();
         }
     }

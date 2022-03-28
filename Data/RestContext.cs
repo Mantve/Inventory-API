@@ -24,6 +24,10 @@ namespace Inventory_API.Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<User>(entity => { entity.HasIndex(e => e.Username).IsUnique(); });
+            modelBuilder.Entity<Room>()
+                .HasOne<User>(r => r.Author)
+                .WithMany(u => u.CreatedRooms)
+                .OnDelete(DeleteBehavior.NoAction);
         }
 
         protected override void OnConfiguring(DbContextOptionsBuilder dbContextOptionsBuilder) => dbContextOptionsBuilder.UseSqlServer(Configuration.GetConnectionString("MainDBConnection"));

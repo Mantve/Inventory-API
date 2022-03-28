@@ -7,12 +7,12 @@ namespace Inventory_API.Data.Entities
 {
     public class User
     {
-        [Key]
-        [MaxLength(32)] [Required] public string Username { get; set; }
+        [Key] [MaxLength(32)] [Required] public string Username { get; set; }
         [Required] [JsonIgnore] public string Password { get; set; }
         public string Role { get; set; }
         public ICollection<User> Friends { get; set; }
-        [InverseProperty("Author")] public ICollection<Room> Rooms { get; set; }
+        [InverseProperty("Author")] public ICollection<Room> CreatedRooms { get; set; }
+        [InverseProperty("SharedWith")] public ICollection<Room> AccessibleRooms { get; set; }
         public ICollection<List> Lists { get; set; }
     }
 }

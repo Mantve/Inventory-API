@@ -39,16 +39,16 @@ namespace Inventory_API.Controllers
             {
                 return BadRequest(new { message = "Username is taken" });
             }
-            var user = new User
+
+            User user = new()
             {
                 Username = dto.Username,
                 Password = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 Role = "Unverified"
             };
-
             user = _userRepository.Create(user).Result;
+
             return Created("success", _mapper.Map<UserDto>(user));
-        
         }
 
         [AllowAnonymous]
@@ -56,22 +56,22 @@ namespace Inventory_API.Controllers
         public IActionResult Login(LoginDto dto)
         {
             User user = _userRepository.GetByUsername(dto.Username).Result;
-
-            if (user == null) return BadRequest(new { message = "User not found" });
-
+            if (user == null)
+            {
+                return BadRequest(new { message = "User not found" });
+            }
             if (!BCrypt.Net.BCrypt.Verify(dto.Password, user.Password))
             {
                 return BadRequest(new { message = "Invalid password" });
             }
 
-            var jwt = _jwtService.Generate( user.Role, user.Username);
-
+            var jwt = _jwtService.Generate(user.Role, user.Username);
             Response.Cookies.Append("jwt", jwt, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = true,
                 SameSite = SameSiteMode.None
-            });;
+            });
 
             return Ok(_mapper.Map<UserDto>(user));
         }
@@ -80,10 +80,12 @@ namespace Inventory_API.Controllers
         [HttpGet("user")]
         public async Task<ActionResult<UserDto>> UserInfo()
         {
-
-                string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+            string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
             User user = await _userRepository.GetByUsername(username);
-            if (user == null) return NotFound($"User with username '{username}' not found.");
+            if (user == null)
+            {
+                return NotFound($"User with username '{username}' not found.");
+            }
 
             return Ok(_mapper.Map<UserDto>(user));
         }
@@ -93,9 +95,12 @@ namespace Inventory_API.Controllers
         [HttpGet("detaileduser")]
         public async Task<ActionResult<DetailedUserDto>> DetailedUserInfo()
         {
-                string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+            string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
             User user = await _userRepository.GetByUsername(username);
-            if (user == null) return NotFound($"User with username '{username}' not found.");
+            if (user == null)
+            {
+                return NotFound($"User with username '{username}' not found.");
+            }
 
             return Ok(_mapper.Map<DetailedUserDto>(user));
         }
@@ -104,29 +109,83 @@ namespace Inventory_API.Controllers
         [HttpGet("friends")]
         public async Task<ActionResult<IEnumerable<DetailedUserDto>>> FriendsInfo()
         {
-                string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-                User user = await _userRepository.GetFriends(username);
-            if (user == null) return NotFound($"User with username '{username}' not found.");
+            string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+            User user = await _userRepository.GetFriends(username);
+            if (user == null)
+            {
+                return NotFound($"User with username '{username}' not found.");
+            }
+            return Ok(user.Friends.Select(o => _mapper.Map<DetailedUserDto>(o)));
+        }
 
-            return Ok(user.Friends.Select(o => _mapper.Map<DetailedUserDto>(o)));
-        } 
-        
         [Authorize]
-        [HttpPost("friends/{messageId}")]
-        public async Task<ActionResult<DetailedUserDto>> AddFriend(int messageId)
+        [HttpPost("friends/{inviteId}")]
+        public async Task<ActionResult<DetailedUserDto>> AcceptInvite(int inviteId)
         {
-                string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-                User user = await _userRepository.GetByUsername(username);
-            if (user == null) return NotFound($"User with username '{username}' not found.");
-            Message message = await _messageRepository.Get(messageId, username);
-            if (message == null) return NotFound($"Message with id '{messageId}' not found.");
+            string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
+            User user = await _userRepository.GetByUsername(username);
+            if (user == null)
+            {
+                return NotFound($"User with username '{username}' not found.");
+            }
+
+            Message message = await _messageRepository.Get(inviteId, username);
+            if (message == null)
+            {
+                return NotFound($"Message with id '{inviteId}' not found.");
+            }
+
+            User author = await _userRepository.GetByUsername(message.Author.Username);
+            if (author == null)
+            {
+                return NotFound($"User with username '{author}' not found.");
+            }
+
+            var res = await AddFriend(user, author);
+            if (res != Ok() )
+            {
+                return res;
+            }
+            res = await AddFriend(author,user);
+            if (res != Ok())
+            {
+                await RemoveFriend(user, author);
+                return res;
+            }
+
             await _messageRepository.Delete(message);
-            if (user.Friends != null && user.Friends.Any(x => x.Username == message.Author.Username)) return ValidationProblem("User is already in the friends list");
-            if (user.Friends == null)
-                user.Friends = new List<User>();
-            user.Friends.Add(message.Author);
-            await _userRepository.Put(user);
             return Ok(user.Friends.Select(o => _mapper.Map<DetailedUserDto>(o)));
+        }
+
+        public async Task<ActionResult> AddFriend(User user, User friend)
+        {
+            if (user.Friends != null && user.Friends.Any(x => x.Username == friend.Username))
+            {
+                return ValidationProblem("User is already in the friends list");
+            }
+            if (user.Friends == null)
+            {
+                user.Friends = new List<User>();
+            }
+            user.Friends.Add(friend);
+            return Ok(await _userRepository.Put(friend));
+        }
+
+        public async Task<ActionResult> RemoveFriend(User user, User friend)
+        {
+            User userFriend=null;
+            if (user.Friends != null)
+            {
+                userFriend = user.Friends.FirstOrDefault(x => x.Username != friend.Username);
+            }
+            if(userFriend==null)
+            {
+                return ValidationProblem("User is not in the friends list");
+            }
+
+            user.Friends.Remove(friend);
+            return Ok(await _userRepository.Put(friend));
         }
 
         [Authorize]

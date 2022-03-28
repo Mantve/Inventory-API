@@ -31,6 +31,7 @@ namespace Inventory_API.Controllers
         public async Task<IEnumerable<MessageDto>> GetAll()
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
             return (await _messageRepository.GetAll(username)).Select(o => _mapper.Map<MessageDto>(o));
         }
 
@@ -39,6 +40,7 @@ namespace Inventory_API.Controllers
         public async Task<IEnumerable<MessageDto>> GetAllSent()
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
             return (await _messageRepository.GetAllCreated(username)).Select(o => _mapper.Map<MessageDto>(o));
         }
 
@@ -47,7 +49,8 @@ namespace Inventory_API.Controllers
         public async Task<IEnumerable<MessageDto>> GetAllType(MessageType type)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            return (await _messageRepository.GetAllType(username,type)).Select(o => _mapper.Map<MessageDto>(o));
+
+            return (await _messageRepository.GetAllType(username, type)).Select(o => _mapper.Map<MessageDto>(o));
         }
 
         [Authorize]
@@ -55,8 +58,12 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<MessageDto>> Get(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
             Message message = await _messageRepository.Get(id, username);
-            if (message == null) return NotFound($"Message with id '{id}' not found.");
+            if (message == null)
+            {
+                return NotFound($"Message with id '{id}' not found.");
+            }
 
             return Ok(_mapper.Map<MessageDto>(message));
         }
@@ -66,14 +73,37 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<MessageDto>> Post(CreateMessageDto dto)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+            if (dto.RecipientName == username)
+            {
+                return ValidationProblem("You cannot send messages to yourself");
+            }
+
             User author = await _userRepository.GetByUsername(username);
-            if (author == null) return NotFound($"User with username '{username}' not found.");
+            if (author == null)
+            {
+                return NotFound($"User with username '{username}' not found.");
+            }
+
             User recipient = await _userRepository.GetByUsername(dto.RecipientName);
-            if (recipient == null) return NotFound($"User with username '{username}' not found.");
+            if (recipient == null)
+            {
+                return NotFound($"User with username '{username}' not found.");
+            }
+
+            if (dto.MessageType == MessageType.FriendRequest)
+            {
+                IEnumerable<Message> previousMessages = await _messageRepository.GetAll(author.Username, recipient.Username, dto.MessageType);
+                if (previousMessages.Any())
+                {
+                    return ValidationProblem("Friend request is already sent to that user");
+                }
+            }
+
             Message message = _mapper.Map<Message>(dto);
             message.Author = author;
             message.Recipient = recipient;
             message = await _messageRepository.Create(message);
+
             return Created(string.Format("/api/message/{0}", message.Id), _mapper.Map<MessageDto>(message));
         }
 
@@ -82,10 +112,15 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<MessageDto>> Delete(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+            
             Message message = await _messageRepository.Get(id, username);
             if (message == null)
+            {
                 return NotFound("Message not found");
+            }
+
             await _messageRepository.Delete(message);
+            
             return NoContent();
         }
     }

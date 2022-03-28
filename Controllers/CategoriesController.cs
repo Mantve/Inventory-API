@@ -31,6 +31,7 @@ namespace Inventory_API.Controllers
         public async Task<IEnumerable<CategoryDto>> GetAll()
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
             return (await _categoryRepository.GetAll(x => x.Author.Username == username)).Select(o => _mapper.Map<CategoryDto>(o));
         }
 
@@ -39,8 +40,13 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<CategoryDto>> Get(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
             Category category = await _categoryRepository.Get(x => x.Id == id && x.Author.Username == username);
-            if (category == null) return NotFound($"Category with id '{id}' not found.");
+            if (category == null)
+            {
+                return NotFound($"Category with id '{id}' not found.");
+            }
+
             return Ok(_mapper.Map<CategoryDto>(category));
         }
 
@@ -50,10 +56,15 @@ namespace Inventory_API.Controllers
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
             User user = await _userRepository.GetFriends(username);
-            if (user == null) return NotFound($"User with username '{username}' not found.");
+            if (user == null)
+            {
+                return NotFound($"User with username '{username}' not found.");
+            }
+
             Category category = _mapper.Map<Category>(dto);
             category.Author = user;
             category = await _categoryRepository.Create(category);
+
             return Created(string.Format("/api/category/{0}", category.Id), _mapper.Map<CategoryDto>(category));
         }
 
@@ -62,11 +73,16 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<CategoryDto>> Put(int id, UpdateCategoryDto dto)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
             Category category = await _categoryRepository.Get(x => x.Id == id && x.Author.Username == username);
             if (category == null)
-                return NotFound("Category not found");
+            {
+                return NotFound($"Category with id '{id}' not found");
+            }
+
             _mapper.Map(dto, category);
             await _categoryRepository.Put(category);
+
             return Ok(_mapper.Map<CategoryDto>(category));
         }
 
@@ -75,9 +91,13 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<CategoryDto>> Delete(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
             Category category = await _categoryRepository.Get(x => x.Id == id && x.Author.Username == username);
             if (category == null)
-                return NotFound("Category not found");
+            {
+                return NotFound($"Category with id '{id}' not found");
+            }
+
             await _categoryRepository.Delete(category);
             return NoContent();
         }

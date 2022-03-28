@@ -31,6 +31,7 @@ namespace Inventory_API.Controllers
         public async Task<IEnumerable<RoomDto>> GetAll()
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
             return (await _roomRepository.GetAll(username)).Select(o => _mapper.Map<RoomDto>(o));
         }
 
@@ -39,8 +40,12 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<RoomDto>> Get(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
             Room room = await _roomRepository.Get(id, username);
-            if (room == null) return NotFound($"Room with id '{id}' not found.");
+            if (room == null)
+            {
+                return NotFound($"Room with id '{id}' not found.");
+            }
 
             return Ok(_mapper.Map<RoomDto>(room));
         }
@@ -49,12 +54,15 @@ namespace Inventory_API.Controllers
         [HttpPost]
         public async Task<ActionResult<RoomDto>> Post(CreateRoomDto dto)
         {
-            Room room = _mapper.Map<Room>(dto);
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
             User user = await _userRepository.GetByUsername(username);
-            if (user == null) return NotFound($"User with username '{username}' not found.");
+            if (user == null)
+            {
+                return NotFound($"User with username '{username}' not found.");
+            }
+
+            Room room = _mapper.Map<Room>(dto);
             room.Author = user;
-            room.SharedWith.Add(user);
             room = await _roomRepository.Create(room);
             return Created(string.Format("/api/room/{0}", room.Id), _mapper.Map<RoomDto>(room));
         }
@@ -64,11 +72,21 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<RoomDto>> Put(int id, UpdateRoomDto dto)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+            User user = await _userRepository.GetByUsername(username);
+            if (user == null)
+            {
+                return NotFound($"User with username '{username}' not found.");
+            }
+
             Room room= await _roomRepository.Get(id,username);
             if (room == null)
+            {
                 return NotFound("Room not found");
+            }
+
             _mapper.Map(dto, room);
             await _roomRepository.Put(room);
+
             return Ok(_mapper.Map<RoomDto>(room));
         }
 
@@ -77,10 +95,15 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult<RoomDto>> Delete(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
             Room room = await _roomRepository.Get(id, username);
             if (room == null)
+            {
                 return NotFound("Room not found");
+            }
+
             await _roomRepository.Delete(room);
+
             return NoContent();
         }
     }

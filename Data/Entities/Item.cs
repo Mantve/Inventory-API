@@ -12,7 +12,6 @@ namespace Inventory_API.Data.Entities
         public ICollection<Item> Items { get; set; }
         [DefaultValue(0)] public decimal Value { get; set; }
         [Required] public Category Category { get; set; }
-        [Required] public User Author { get; set; }
         [MaxLength(64)] public string Comments { get; set; }
         [Required] public Room Room { get; set; }
         public int Level { get; set; }

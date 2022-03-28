@@ -13,6 +13,7 @@ namespace Inventory_API.Data.Repositories
         Task<IEnumerable<Message>> GetAllCreated(string username);
         Task<IEnumerable<Message>> GetAllType(string username, MessageType messageType);
         Task<Message> GetCreated(int id, string username);
+        Task<IEnumerable<Message>> GetAll(string author, string recipient, MessageType type);
     }
 
     public class MessageRepository : GenericRepository<Message>, IMessageRepository
@@ -36,6 +37,11 @@ namespace Inventory_API.Data.Repositories
         public async Task<Message> Get(int id, string username)
         {
             return await _restContext.Messages.Include(x => x.Author).FirstOrDefaultAsync(x => x.Id == id && x.Recipient.Username == username);
+        }
+        
+        public async Task<IEnumerable<Message>> GetAll(string author, string recipient, MessageType type)
+        {
+            return await _restContext.Messages.Include(x => x.Author).Where(x => x.MessageType==type && x.Author.Username==author && x.Recipient.Username == recipient).ToListAsync();
         }
 
         public async Task<IEnumerable<Message>> GetAll(string username)

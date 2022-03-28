@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Inventory_API.Migrations
 {
     [DbContext(typeof(RestContext))]
-    [Migration("20220323090428_InitialMigration")]
-    partial class InitialMigration
+    [Migration("20220327174934_Initial")]
+    partial class Initial
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -54,9 +54,6 @@ namespace Inventory_API.Migrations
                         .HasColumnType("int")
                         .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
 
-                    b.Property<string>("AuthorUsername")
-                        .HasColumnType("nvarchar(32)");
-
                     b.Property<int?>("CategoryId")
                         .HasColumnType("int");
 
@@ -85,8 +82,6 @@ namespace Inventory_API.Migrations
                         .HasColumnType("decimal(18,2)");
 
                     b.HasKey("Id");
-
-                    b.HasIndex("AuthorUsername");
 
                     b.HasIndex("CategoryId");
 
@@ -242,15 +237,10 @@ namespace Inventory_API.Migrations
                     b.Property<string>("Role")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int?>("RoomId")
-                        .HasColumnType("int");
-
                     b.Property<string>("Username1")
                         .HasColumnType("nvarchar(32)");
 
                     b.HasKey("Username");
-
-                    b.HasIndex("RoomId");
 
                     b.HasIndex("Username")
                         .IsUnique();
@@ -258,6 +248,21 @@ namespace Inventory_API.Migrations
                     b.HasIndex("Username1");
 
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("RoomUser", b =>
+                {
+                    b.Property<int>("AccessibleRoomsId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("SharedWithUsername")
+                        .HasColumnType("nvarchar(32)");
+
+                    b.HasKey("AccessibleRoomsId", "SharedWithUsername");
+
+                    b.HasIndex("SharedWithUsername");
+
+                    b.ToTable("RoomUser");
                 });
 
             modelBuilder.Entity("Inventory_API.Data.Entities.Category", b =>
@@ -271,10 +276,6 @@ namespace Inventory_API.Migrations
 
             modelBuilder.Entity("Inventory_API.Data.Entities.Item", b =>
                 {
-                    b.HasOne("Inventory_API.Data.Entities.User", "Author")
-                        .WithMany()
-                        .HasForeignKey("AuthorUsername");
-
                     b.HasOne("Inventory_API.Data.Entities.Category", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId");
@@ -288,8 +289,6 @@ namespace Inventory_API.Migrations
                         .HasForeignKey("RoomId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
-
-                    b.Navigation("Author");
 
                     b.Navigation("Category");
 
@@ -359,9 +358,9 @@ namespace Inventory_API.Migrations
             modelBuilder.Entity("Inventory_API.Data.Entities.Room", b =>
                 {
                     b.HasOne("Inventory_API.Data.Entities.User", "Author")
-                        .WithMany("Rooms")
+                        .WithMany("CreatedRooms")
                         .HasForeignKey("AuthorUsername")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.NoAction)
                         .IsRequired();
 
                     b.Navigation("Author");
@@ -369,13 +368,24 @@ namespace Inventory_API.Migrations
 
             modelBuilder.Entity("Inventory_API.Data.Entities.User", b =>
                 {
-                    b.HasOne("Inventory_API.Data.Entities.Room", null)
-                        .WithMany("SharedWith")
-                        .HasForeignKey("RoomId");
-
                     b.HasOne("Inventory_API.Data.Entities.User", null)
                         .WithMany("Friends")
                         .HasForeignKey("Username1");
+                });
+
+            modelBuilder.Entity("RoomUser", b =>
+                {
+                    b.HasOne("Inventory_API.Data.Entities.Room", null)
+                        .WithMany()
+                        .HasForeignKey("AccessibleRoomsId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Inventory_API.Data.Entities.User", null)
+                        .WithMany()
+                        .HasForeignKey("SharedWithUsername")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Inventory_API.Data.Entities.Item", b =>
@@ -391,17 +401,15 @@ namespace Inventory_API.Migrations
             modelBuilder.Entity("Inventory_API.Data.Entities.Room", b =>
                 {
                     b.Navigation("Items");
-
-                    b.Navigation("SharedWith");
                 });
 
             modelBuilder.Entity("Inventory_API.Data.Entities.User", b =>
                 {
+                    b.Navigation("CreatedRooms");
+
                     b.Navigation("Friends");
 
                     b.Navigation("Lists");
-
-                    b.Navigation("Rooms");
                 });
 #pragma warning restore 612, 618
         }

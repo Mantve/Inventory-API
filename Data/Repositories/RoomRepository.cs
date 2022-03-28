@@ -23,7 +23,7 @@ namespace Inventory_API.Data.Repositories
 
         public async Task<Room> Get(int id, string username)
         {
-            return await _restContext.Rooms.FirstOrDefaultAsync(x => x.Id == id && x.SharedWith.Any( y => y.Username == username));
+            return await _restContext.Rooms.Include(x=>x.Author).Include(x=>x.SharedWith).FirstOrDefaultAsync(x => x.Id == id && x.SharedWith.Any( y => y.Username == username));
         }
 
         public async Task<IEnumerable<Room>> GetAll(string username)

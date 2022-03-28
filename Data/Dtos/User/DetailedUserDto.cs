@@ -4,6 +4,6 @@ using System.Collections.Generic;
 
 namespace Inventory_API.Data.Dtos.User
 {
-    public record DetailedUserDto(string Username, string Role, List<UserDto> Friends, List<RoomDto> Rooms, List<ListDto> Lists);
+    public record DetailedUserDto(string Username, string Role, List<UserDto> Friends, List<RoomDto> CreatedRooms, List<ListDto> Lists);
 
 }
