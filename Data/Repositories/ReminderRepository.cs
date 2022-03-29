@@ -22,7 +22,7 @@ namespace Inventory_API.Data.Repositories
 
         public async Task<Reminder> Get(int id, string username)
         {
-            return await _restContext.Reminders.Include(x=>x.Item).FirstOrDefaultAsync(x => x.Id == id && x.Author.Username == username);
+            return await _restContext.Reminders.Include(x=>x.Item).ThenInclude(x=>x.Room).FirstOrDefaultAsync(x => x.Id == id && x.Author.Username == username);
         }
 
         public async Task<IEnumerable<Reminder>> GetAll(string username)

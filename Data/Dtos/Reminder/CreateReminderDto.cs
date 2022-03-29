@@ -8,5 +8,5 @@ namespace Inventory_API.Data.Dtos.Reminder
         [Required()] int? ItemId,
         string Reason,
         [Required()] DateTime ReminderTime,
-        RepeatFrequency RepeatFrequency);
+        int RepeatFrequency);
 }

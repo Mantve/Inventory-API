@@ -17,22 +17,49 @@ namespace Inventory_API.Controllers
     {
         private readonly ICategoryRepository _categoryRepository;
         private readonly IUserRepository _userRepository;
+        private readonly IRoomRepository _roomRepository;
+        private readonly IItemRepository _itemRepository;
         private readonly IMapper _mapper;
 
-        public CategoriesController(ICategoryRepository categoryRepository, IUserRepository userRepository, IMapper mapper)
+        public CategoriesController(ICategoryRepository categoryRepository, IUserRepository userRepository, IRoomRepository roomRepository, IItemRepository itemRepository, IMapper mapper)
         {
             _categoryRepository = categoryRepository;
             _userRepository = userRepository;
+            _roomRepository = roomRepository;
+            _itemRepository = itemRepository;
             _mapper = mapper;
         }
 
         [Authorize]
         [HttpGet]
-        public async Task<IEnumerable<CategoryDto>> GetAll()
+        public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAll()
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
 
-            return (await _categoryRepository.GetAll(x => x.Author.Username == username)).Select(o => _mapper.Map<CategoryDto>(o));
+            return Ok((await _categoryRepository.GetAll(x => x.Author.Username == username)).Select(o => _mapper.Map<CategoryDto>(o)));
+        }
+
+        [Authorize]
+        [HttpGet("/api/room/{id}/categories")]
+        public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAllFromRoom(int id)
+        {
+            string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
+            Room room = await _roomRepository.Get(id, username);
+            if (room == null)
+            {
+                return NotFound($"Room with id {id} not found");
+            }
+
+            List<Category> categories = new();
+
+            IEnumerable<Item> items = await _itemRepository.GetAll(id);
+            foreach(Item item in items)
+            {
+                categories.Add(item.Category);
+            }
+
+            return Ok(categories.Distinct().ToList().Select(o => _mapper.Map<CategoryDto>(o)));
         }
 
         [Authorize]

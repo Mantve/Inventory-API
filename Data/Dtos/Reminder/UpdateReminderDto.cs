@@ -8,5 +8,5 @@ namespace Inventory_API.Data.Dtos.Reminder
     public record UpdateReminderDto(
         string Reason,
         DateTime ReminderTime,
-        RepeatFrequency RepeatFrequency);
+        int RepeatFrequency);
 }
