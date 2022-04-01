@@ -76,7 +76,7 @@ namespace Inventory_API
                 app.UseDeveloperExceptionPage();
             app.UseRouting();
             app.UseCors((options => options
-                .WithOrigins(new[] { "http://localhost:4200", "https://stuff.mantve.eu", "https://mantve.github.io" })
+                .WithOrigins(new[] { "http://localhost:4200", "http://localhost:8080", "https://stuff.mantve.eu", "https://mantve.github.io" })
                 .AllowAnyHeader()
                 .AllowAnyMethod()
                 .AllowCredentials()

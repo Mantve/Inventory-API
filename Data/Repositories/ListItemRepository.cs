@@ -24,7 +24,7 @@ namespace Inventory_API.Data.Repositories
 
         public async Task<ListItem> Get(int id, string username)
         {
-            return await _restContext.ListItems.Include(x => x.Item).FirstOrDefaultAsync(x => x.Id == id && x.ParentList.Author.Username == username);
+            return await _restContext.ListItems.Include(x => x.Item).Include(x => x.ParentList).FirstOrDefaultAsync(x => x.Id == id && x.ParentList.Author.Username == username);
         }
 
         public async Task<IEnumerable<ListItem>> GetAll(string username)

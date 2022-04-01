@@ -74,7 +74,7 @@ namespace Inventory_API.Controllers
             }
 
             List list = await _listRepository.Get((int)dto.ParentListId, username);
-            if (item == null)
+            if (list == null)
             {
                 return NotFound($"List with id'{dto.ParentListId}' not found.");
             }
@@ -83,6 +83,9 @@ namespace Inventory_API.Controllers
             listItem.ParentList = list;
             listItem.Item = item;
             listItem = await _listItemRepository.Create(listItem);
+
+            list.ItemCount++;
+            await _listRepository.Put(list);
 
             return Created(string.Format("/api/listItem/{0}", listItem.Id), _mapper.Map<ListItemDto>(listItem));
         }
@@ -117,7 +120,17 @@ namespace Inventory_API.Controllers
                 return NotFound("ListItem not found");
             }
 
+
+            List list = await _listRepository.Get(listItem.ParentList.Id, username);
+            if (list == null)
+            {
+                return NotFound($"List with id'{listItem.ParentList}' not found.");
+            }
+
             await _listItemRepository.Delete(listItem);
+
+            list.ItemCount--;
+            await _listRepository.Put(list);
 
             return NoContent();
         }
