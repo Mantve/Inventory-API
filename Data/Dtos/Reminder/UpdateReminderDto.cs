@@ -1,6 +1,4 @@
-﻿using Inventory_API.Data.Entities;
-using System;
-using System.ComponentModel.DataAnnotations;
+﻿using System;
 
 namespace Inventory_API.Data.Dtos.Reminder
 

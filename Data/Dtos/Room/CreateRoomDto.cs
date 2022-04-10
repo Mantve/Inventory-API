@@ -1,6 +1,4 @@
-﻿using Inventory_API.Data.Dtos.User;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Inventory_API.Data.Dtos.Room
 {

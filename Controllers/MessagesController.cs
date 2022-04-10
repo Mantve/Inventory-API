@@ -86,7 +86,7 @@ namespace Inventory_API.Controllers
 
             if (dto.MessageType == MessageType.FriendRequest)
             {
-                if(author.Friends.Any(x=> x.Username == dto.RecipientName))
+                if (author.Friends.Any(x => x.Username == dto.RecipientName))
                 {
                     return ValidationProblem("You are already friends with that user");
                 }
@@ -116,7 +116,7 @@ namespace Inventory_API.Controllers
         public async Task<ActionResult> Delete(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
-            
+
             Message message = await _messageRepository.Get(id, username);
             if (message == null)
             {
@@ -124,7 +124,7 @@ namespace Inventory_API.Controllers
             }
 
             await _messageRepository.Delete(message);
-            
+
             return NoContent();
         }
     }

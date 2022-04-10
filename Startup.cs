@@ -1,17 +1,17 @@
 using Inventory_API.Data;
+using Inventory_API.Data.Repositories;
 using Inventory_API.Helpers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 using System.Threading.Tasks;
-using Microsoft.Extensions.Configuration;
-using Microsoft.EntityFrameworkCore;
-using Inventory_API.Data.Repositories;
-using Microsoft.OpenApi.Models;
 
 namespace Inventory_API
 {
@@ -37,6 +37,7 @@ namespace Inventory_API
             services.AddTransient<IListRepository, ListRepository>();
             services.AddTransient<IReminderRepository, ReminderRepository>();
             services.AddTransient<IMessageRepository, MessageRepository>();
+            services.AddTransient<ISubscriptionRepository, SubscriptionRepository>();
             services.AddTransient<JwtService>();
             services.AddAuthentication(options =>
             {
@@ -65,7 +66,6 @@ namespace Inventory_API
                                 IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(Configuration.GetValue<string>("JwtSecret")))
                             };
                         });
-
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

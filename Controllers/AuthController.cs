@@ -6,7 +6,6 @@ using Inventory_API.Helpers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Claims;
@@ -179,7 +178,7 @@ namespace Inventory_API.Controllers
             }
 
             var res = await RemoveFriend(user, friend);
-            if(res is not OkResult)
+            if (res is not OkResult)
             {
                 return res;
             }

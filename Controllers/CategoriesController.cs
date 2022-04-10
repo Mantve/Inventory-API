@@ -54,7 +54,7 @@ namespace Inventory_API.Controllers
             List<Category> categories = new();
 
             IEnumerable<Item> items = await _itemRepository.GetAll(id);
-            foreach(Item item in items)
+            foreach (Item item in items)
             {
                 categories.Add(item.Category);
             }

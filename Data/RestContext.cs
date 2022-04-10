@@ -20,6 +20,7 @@ namespace Inventory_API.Data
         public DbSet<ListItem> ListItems { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<Reminder> Reminders { get; set; }
+        public DbSet<Subscription> Subscriptions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

@@ -38,10 +38,10 @@ namespace Inventory_API.Data.Repositories
         {
             return await _restContext.Messages.Include(x => x.Author).FirstOrDefaultAsync(x => x.Id == id && x.Recipient.Username == username);
         }
-        
+
         public async Task<IEnumerable<Message>> GetAll(string author, string recipient, MessageType type)
         {
-            return await _restContext.Messages.Include(x => x.Author).Where(x => x.MessageType==type && x.Author.Username==author && x.Recipient.Username == recipient).ToListAsync();
+            return await _restContext.Messages.Include(x => x.Author).Where(x => x.MessageType == type && x.Author.Username == author && x.Recipient.Username == recipient).ToListAsync();
         }
 
         public async Task<IEnumerable<Message>> GetAll(string username)
@@ -51,7 +51,7 @@ namespace Inventory_API.Data.Repositories
 
         public async Task<IEnumerable<Message>> GetAllType(string username, MessageType messageType)
         {
-            return await _restContext.Messages.Include(x=> x.Author).Where(x => x.Recipient.Username == username && x.MessageType == messageType).ToListAsync();
+            return await _restContext.Messages.Include(x => x.Author).Where(x => x.Recipient.Username == username && x.MessageType == messageType).ToListAsync();
         }
 
     }

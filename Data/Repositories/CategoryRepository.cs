@@ -1,8 +1,4 @@
 ﻿using Inventory_API.Data.Entities;
-using Microsoft.EntityFrameworkCore;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Inventory_API.Data.Repositories
 {
@@ -11,7 +7,7 @@ namespace Inventory_API.Data.Repositories
 
     }
 
-    public class CategoryRepository :  GenericRepository<Category>, ICategoryRepository
+    public class CategoryRepository : GenericRepository<Category>, ICategoryRepository
     {
         public CategoryRepository(RestContext restContext) : base(restContext)
         {

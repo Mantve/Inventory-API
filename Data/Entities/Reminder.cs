@@ -1,9 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Inventory_API.Data.Entities
 {
@@ -15,6 +12,7 @@ namespace Inventory_API.Data.Entities
         [Required] public DateTime ReminderTime { get; set; }
         [DefaultValue(RepeatFrequency.None)] public RepeatFrequency RepeatFrequency { get; set; }
         [Required] public User Author { get; set; }
+        [DefaultValue(false)] public bool Expired { get; set; }
     }
 
 }

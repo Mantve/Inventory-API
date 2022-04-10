@@ -6,9 +6,9 @@ namespace Inventory_API.Data.Dtos.Item
         [Required()] string Name,
         [Required()] float Quantity,
         decimal Value,
-        int CategoryId, 
+        int CategoryId,
         int? ParentItemId,
-        string Comments, 
+        string Comments,
         [Required()] int RoomId);
 
 }

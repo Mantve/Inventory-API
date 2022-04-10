@@ -9,5 +9,6 @@ namespace Inventory_API.Data.Dtos.Reminder
         ItemDto Item,
         string Reason,
         DateTime ReminderTime,
-        RepeatFrequency RepeatFrequency);
+        RepeatFrequency RepeatFrequency,
+        bool Expired);
 }

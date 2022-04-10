@@ -6,6 +6,7 @@ using Inventory_API.Data.Dtos.ListItem;
 using Inventory_API.Data.Dtos.Message;
 using Inventory_API.Data.Dtos.Reminder;
 using Inventory_API.Data.Dtos.Room;
+using Inventory_API.Data.Dtos.Subscription;
 using Inventory_API.Data.Dtos.User;
 using Inventory_API.Data.Entities;
 
@@ -41,6 +42,7 @@ namespace Inventory_API.Data
             CreateMap<Item, ItemDto>();
             CreateMap<Item, RecursiveItemDto>();
             CreateMap<Item, ParentlessItemDto>();
+            CreateMap<CreateSubscriptionDto, Subscription>();
 
         }
     }

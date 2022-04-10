@@ -24,7 +24,7 @@ namespace Inventory_API.Data.Repositories
 
         public async Task<User> GetByUsername(string username)
         {
-            return await _restContext.Users.Include(x=>x.Friends).FirstOrDefaultAsync(u => u.Username == username);
+            return await _restContext.Users.Include(x => x.Friends).FirstOrDefaultAsync(u => u.Username == username);
         }
 
         public async Task<User> GetFriends(string username)

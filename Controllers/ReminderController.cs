@@ -63,7 +63,7 @@ namespace Inventory_API.Controllers
                 return NotFound($"User with username '{username}' not found.");
             }
 
-            Item item = await _itemRepository.Get((int)dto.ItemId,username);
+            Item item = await _itemRepository.Get((int)dto.ItemId, username);
             if (item == null)
             {
                 return NotFound($"Item with id '{dto.ItemId}' not found.");

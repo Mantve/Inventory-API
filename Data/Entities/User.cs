@@ -15,5 +15,6 @@ namespace Inventory_API.Data.Entities
         [InverseProperty("Author")] public ICollection<Room> CreatedRooms { get; set; }
         [InverseProperty("SharedWith")] public ICollection<Room> AccessibleRooms { get; set; }
         public ICollection<List> Lists { get; set; }
+        public ICollection<Subscription> Subscriptions { get; set; }
     }
 }

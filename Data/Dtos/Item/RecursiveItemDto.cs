@@ -6,14 +6,14 @@ namespace Inventory_API.Data.Dtos.Item
 {
     public record RecursiveItemDto(
         int Id,
-        string Name, 
+        string Name,
         float Quantity,
         decimal Value,
         string Comments,
         RoomDto Room,
-        CategoryDto Category, 
+        CategoryDto Category,
         List<RecursiveItemDto> Items,
         int Level,
-        ParentlessItemDto ParentItem );
+        ParentlessItemDto ParentItem);
 
 }
