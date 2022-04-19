@@ -45,6 +45,16 @@ namespace Inventory_API.Controllers
         }
 
         [Authorize]
+        [HttpGet("search/{searchTerm}")]
+        public async Task<ActionResult<IEnumerable<ItemDto>>> GetAll(string searchTerm)
+        {
+            string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
+            return Ok((await _itemRepository.GetAll(username, searchTerm)).Select(o => _mapper.Map<ItemDto>(o)));
+        }
+
+
+        [Authorize]
         [HttpGet("all/{roomId}")]
         public async Task<ActionResult<IEnumerable<ItemDto>>> GetAll(int roomId)
         {

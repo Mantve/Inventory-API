@@ -4,14 +4,16 @@ using Inventory_API.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 namespace Inventory_API.Migrations
 {
     [DbContext(typeof(RestContext))]
-    partial class RestContextModelSnapshot : ModelSnapshot
+    [Migration("20220419162130_vapidByteArray")]
+    partial class vapidByteArray
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -241,11 +243,11 @@ namespace Inventory_API.Migrations
                     b.Property<byte[]>("Endpoint")
                         .HasColumnType("varbinary(max)");
 
-                    b.Property<DateTime?>("ExpirationTime")
-                        .HasColumnType("datetime2");
-
                     b.Property<byte[]>("P256dh")
                         .HasColumnType("varbinary(max)");
+
+                    b.Property<DateTime?>("RxpirationTime")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Username")
                         .HasColumnType("nvarchar(32)");

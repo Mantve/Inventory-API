@@ -13,6 +13,7 @@ namespace Inventory_API.Data.Repositories
         Task<Item> GetRecursive(int id);
         Task<Item> GetParent(Item item);
         Task<IEnumerable<Item>> GetAll(string username);
+        Task<IEnumerable<Item>> GetAll(string username, string searchTerm);
         Task<IEnumerable<Item>> GetAll(int roomId);
         Task<IEnumerable<Item>> GetAllRecursive(int roomId);
     }
@@ -81,6 +82,16 @@ namespace Inventory_API.Data.Repositories
                 .Where(x => x.Room.SharedWith.Any(y => y.Username == username)).ToListAsync();
         }
 
+        public async Task<IEnumerable<Item>> GetAll(string username, string searchTerm)
+        {
+            return await _restContext.Items
+                .Include(x => x.Room)
+                    .ThenInclude(x => x.SharedWith)
+                .Include(x => x.Items)
+                .Include(x => x.Category)
+                .Where(x => x.Room.SharedWith.Any(y => y.Username == username) && x.Name.Contains(searchTerm)).ToListAsync();
+        }
+
         public async Task<IEnumerable<Item>> GetAllRecursive(int roomId)
         {
             var items = await _restContext.Items
@@ -121,6 +132,6 @@ namespace Inventory_API.Data.Repositories
                 .Include(x => x.Category)
                 .FirstOrDefaultAsync(x => x.Items.Contains(item));
         }
-
+        
     }
 }

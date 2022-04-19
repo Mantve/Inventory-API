@@ -90,6 +90,7 @@ namespace Inventory_API.Controllers
             }
 
             _mapper.Map(dto, reminder);
+            reminder.Expired = false;
             await _reminderRepository.Put(reminder);
 
             return Ok(_mapper.Map<ReminderDto>(reminder));
