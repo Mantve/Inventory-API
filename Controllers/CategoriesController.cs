@@ -53,7 +53,25 @@ namespace Inventory_API.Controllers
 
             List<Category> categories = new();
 
-            IEnumerable<Item> items = await _itemRepository.GetAll(id);
+            IEnumerable<Item> items = await _itemRepository.GetAllFromRoom(id,username);
+            foreach (Item item in items)
+            {
+                categories.Add(item.Category);
+            }
+
+            return Ok(categories.Distinct().ToList().Select(o => _mapper.Map<CategoryDto>(o)));
+        }
+
+        [Authorize]
+        [HttpGet("/api/item/{id}/categories")]
+        public async Task<ActionResult<IEnumerable<CategoryDto>>> GetAllFromItem(int id)
+        {
+            string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
+            IEnumerable<Item> items = await _itemRepository.GetAll(id, username);
+
+            List<Category> categories = new();
+
             foreach (Item item in items)
             {
                 categories.Add(item.Category);

@@ -41,7 +41,7 @@ namespace Inventory_API.Controllers
                 return NotFound($"Room with id {roomId} not found");
             }
 
-            return Ok((await _itemRepository.GetAllRecursive(roomId)).Select(o => _mapper.Map<RecursiveItemDto>(o)));
+            return Ok((await _itemRepository.GetAllRecursiveFromRoom(roomId,username)).Select(o => _mapper.Map<RecursiveItemDto>(o)));
         }
 
         [Authorize]
@@ -50,7 +50,7 @@ namespace Inventory_API.Controllers
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
 
-            return Ok((await _itemRepository.GetAll(username, searchTerm)).Select(o => _mapper.Map<ItemDto>(o)));
+            return Ok((await _itemRepository.SearchAll(username, searchTerm)).Select(o => _mapper.Map<ItemDto>(o)));
         }
 
 
@@ -65,7 +65,7 @@ namespace Inventory_API.Controllers
                 return NotFound($"Room with id {roomId} not found");
             }
 
-            return Ok((await _itemRepository.GetAll(roomId)).Select(o => _mapper.Map<ItemDto>(o)));
+            return Ok((await _itemRepository.GetAllFromRoom(roomId,username)).Select(o => _mapper.Map<ItemDto>(o)));
         }
 
         [Authorize]
@@ -74,7 +74,7 @@ namespace Inventory_API.Controllers
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
 
-            Item item = await _itemRepository.GetRecursive(id);
+            Item item = await _itemRepository.GetRecursive(id,username);
             if (item == null || !item.Room.SharedWith.Any(x => x.Username == username))
             {
                 return NotFound($"Item with id '{id}' not found.");
@@ -89,7 +89,7 @@ namespace Inventory_API.Controllers
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
 
-            Item item = await _itemRepository.Get(id);
+            Item item = await _itemRepository.Get(id,username);
             if (item == null || !item.Room.SharedWith.Any(x => x.Username == username))
             {
                 return NotFound($"Item with id '{id}' not found.");
@@ -112,7 +112,7 @@ namespace Inventory_API.Controllers
             Item parentItem = null;
             if (dto.ParentItemId != null)
             {
-                parentItem = await _itemRepository.Get((int)dto.ParentItemId);
+                parentItem = await _itemRepository.Get((int)dto.ParentItemId, username);
                 if (parentItem == null || !parentItem.Room.SharedWith.Any(x => x.Username == username))
                 {
                     return NotFound($"Parent item with id '{dto.ParentItemId}' not found");
@@ -149,7 +149,7 @@ namespace Inventory_API.Controllers
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
 
-            Item item = await _itemRepository.Get(id);
+            Item item = await _itemRepository.Get(id,username);
             if (item == null || !item.Room.SharedWith.Any(x => x.Username == username))
             {
                 return NotFound($"Item with id '{id}' not found");
@@ -158,7 +158,7 @@ namespace Inventory_API.Controllers
             Item parentItem = null;
             if (dto.ParentItemId != null)
             {
-                parentItem = await _itemRepository.Get((int)dto.ParentItemId);
+                parentItem = await _itemRepository.Get((int)dto.ParentItemId, username);
                 if (parentItem == null || !parentItem.Room.SharedWith.Any(x => x.Username == username))
                 {
                     return NotFound($"Parent item with id '{dto.ParentItemId}' not found");
@@ -192,7 +192,7 @@ namespace Inventory_API.Controllers
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
 
-            Item item = await _itemRepository.Get(id);
+            Item item = await _itemRepository.Get(id,username);
             if (item == null || !item.Room.SharedWith.Any(x => x.Username == username))
             {
                 return NotFound($"Item with id '{id}' not found");

@@ -28,7 +28,7 @@ namespace Inventory_API.Data.Repositories
 
         public async Task<IEnumerable<Room>> GetAll(string username)
         {
-            return await _restContext.Rooms.Where(x => x.SharedWith.Any(y => y.Username == username)).ToListAsync();
+            return await _restContext.Rooms.Include(x => x.Author).Include(x => x.SharedWith).Where(x => x.SharedWith.Any(y => y.Username == username)).ToListAsync();
         }
 
     }
