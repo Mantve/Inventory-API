@@ -9,6 +9,7 @@ namespace Inventory_API.Data.Entities
     {
         [Key] [MaxLength(32)] [Required] public string Username { get; set; }
         [Required] [JsonIgnore] public string Password { get; set; }
+        [Required] public string Email { get; set; }
         public string Role { get; set; }
         public ICollection<User> Friends { get; set; }
         public ICollection<User> FriendOf { get; set; }

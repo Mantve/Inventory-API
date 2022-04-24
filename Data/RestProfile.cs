@@ -18,6 +18,8 @@ namespace Inventory_API.Data
         {
             CreateMap<User, UserDto>();
             CreateMap<User, DetailedUserDto>();
+            CreateMap<PasswordChangeDto, User>();
+            CreateMap<UpdateUserDto, User>();
             CreateMap<CreateRoomDto, Room>();
             CreateMap<UpdateRoomDto, Room>();
             CreateMap<Room, RoomDto>();

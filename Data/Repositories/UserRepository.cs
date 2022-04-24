@@ -10,6 +10,7 @@ namespace Inventory_API.Data.Repositories
     public interface IUserRepository : IGenericRepository<User>
     {
         Task<User> GetByUsername(string username);
+        Task<User> GetByEmail(string username);
         Task<User> GetFriends(string username);
         Task<IEnumerable<User>> GetByRole(string role);
     }
@@ -25,6 +26,11 @@ namespace Inventory_API.Data.Repositories
         public async Task<User> GetByUsername(string username)
         {
             return await _restContext.Users.Include(x => x.Friends).FirstOrDefaultAsync(u => u.Username == username);
+        }
+
+        public async Task<User> GetByEmail(string email)
+        {
+            return await _restContext.Users.Include(x => x.Friends).FirstOrDefaultAsync(u => u.Email == email);
         }
 
         public async Task<User> GetFriends(string username)

@@ -31,30 +31,33 @@ namespace Inventory_API.Controllers
 
         [AllowAnonymous]
         [HttpPost("register")]
-        public IActionResult Register(RegisterDto dto)
+        public async Task<ActionResult> Register(RegisterDto dto)
         {
-            var a = _userRepository.GetByUsername(dto.Username).Result;
-            if (a != null)
+            if (await _userRepository.GetByUsername(dto.Username) != null)
             {
                 return BadRequest(new { message = "Username is taken" });
             }
-
+            if (await _userRepository.GetByEmail(dto.Email) != null)
+            {
+                return BadRequest(new { message = "Email is taken" });
+            }
             User user = new()
             {
+                Email = dto.Email,
                 Username = dto.Username,
                 Password = BCrypt.Net.BCrypt.HashPassword(dto.Password),
                 Role = "Unverified"
             };
-            user = _userRepository.Create(user).Result;
+            user = await _userRepository.Create(user);
 
             return Created("success", _mapper.Map<UserDto>(user));
         }
 
         [AllowAnonymous]
         [HttpPost("login")]
-        public IActionResult Login(LoginDto dto)
+        public async Task<ActionResult> Login(LoginDto dto)
         {
-            User user = _userRepository.GetByUsername(dto.Username).Result;
+            User user = await _userRepository.GetByUsername(dto.Username);
             if (user == null)
             {
                 return BadRequest(new { message = "User not found" });
@@ -77,7 +80,7 @@ namespace Inventory_API.Controllers
 
         [Authorize]
         [HttpGet("user")]
-        public async Task<ActionResult<UserDto>> UserInfo()
+        public async Task<ActionResult<UserDto>> GetUserInfo()
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
             User user = await _userRepository.GetByUsername(username);
@@ -89,6 +92,40 @@ namespace Inventory_API.Controllers
             return Ok(_mapper.Map<UserDto>(user));
         }
 
+        [Authorize]
+        [HttpPut("user")]
+        public async Task<ActionResult<UserDto>> UpdateUserInfo(UpdateUserDto dto)
+        {
+            string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+            User user = await _userRepository.GetByUsername(username);
+            if (user == null)
+            {
+                return NotFound($"User with username '{username}' not found.");
+            }
+            _mapper.Map(dto, user);
+            user = await _userRepository.Put(user);
+            return Ok(_mapper.Map<UserDto>(user));
+        }
+
+        [Authorize]
+        [HttpPut("changePassword")]
+        public async Task<ActionResult<UserDto>> ChangePassword(PasswordChangeDto dto)
+        {
+            string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+            var user = await _userRepository.GetByUsername(username);
+            if (user == null)
+            {
+                return NotFound($"User with username '{username}' not found.");
+            }
+            if(!BCrypt.Net.BCrypt.Verify(dto.OldPassword, user.Password))
+            {
+                return ValidationProblem("Old passwords do not match");
+            }
+            user.Password = BCrypt.Net.BCrypt.HashPassword(dto.NewPassword);
+            user = await _userRepository.Put(user);
+
+            return Created("success", _mapper.Map<UserDto>(user));
+        }
 
         [Authorize]
         [HttpGet("detaileduser")]
