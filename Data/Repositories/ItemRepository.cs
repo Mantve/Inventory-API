@@ -47,7 +47,7 @@ namespace Inventory_API.Data.Repositories
             List<Item> res = items.ToList();
             foreach (var item in items)
             {
-                foreach(var child in item.Items)
+                foreach (var child in item.Items)
                 {
                     res.AddRange(GetAll(child.Id, username).Result);
 
@@ -134,6 +134,6 @@ namespace Inventory_API.Data.Repositories
                 .Include(x => x.Category)
                 .FirstOrDefaultAsync(x => x.Items.Contains(item));
         }
-        
+
     }
 }

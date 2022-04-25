@@ -117,7 +117,7 @@ namespace Inventory_API.Controllers
             {
                 return NotFound($"User with username '{username}' not found.");
             }
-            if(!BCrypt.Net.BCrypt.Verify(dto.OldPassword, user.Password))
+            if (!BCrypt.Net.BCrypt.Verify(dto.OldPassword, user.Password))
             {
                 return ValidationProblem("Old passwords do not match");
             }

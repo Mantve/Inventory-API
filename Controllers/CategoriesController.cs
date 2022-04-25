@@ -53,7 +53,7 @@ namespace Inventory_API.Controllers
 
             List<Category> categories = new();
 
-            IEnumerable<Item> items = await _itemRepository.GetAllFromRoom(id,username);
+            IEnumerable<Item> items = await _itemRepository.GetAllFromRoom(id, username);
             foreach (Item item in items)
             {
                 categories.Add(item.Category);

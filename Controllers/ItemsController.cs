@@ -31,8 +31,8 @@ namespace Inventory_API.Controllers
         }
 
         [Authorize]
-        [HttpGet("all/recursive/{roomId}")]
-        public async Task<ActionResult<IEnumerable<RecursiveItemDto>>> GetAllRecursive(int roomId)
+        [HttpGet("/api/room/{roomId}/itemsRecursive")]
+        public async Task<ActionResult<IEnumerable<RecursiveItemDto>>> GetAllRecursiveRoom(int roomId)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
 
@@ -41,7 +41,7 @@ namespace Inventory_API.Controllers
                 return NotFound($"Room with id {roomId} not found");
             }
 
-            return Ok((await _itemRepository.GetAllRecursiveFromRoom(roomId,username)).Select(o => _mapper.Map<RecursiveItemDto>(o)));
+            return Ok((await _itemRepository.GetAllRecursiveFromRoom(roomId, username)).Select(o => _mapper.Map<RecursiveItemDto>(o)));
         }
 
         [Authorize]
@@ -53,10 +53,18 @@ namespace Inventory_API.Controllers
             return Ok((await _itemRepository.SearchAll(username, searchTerm)).Select(o => _mapper.Map<ItemDto>(o)));
         }
 
+        [Authorize]
+        [HttpGet("{itemId}/all")]
+        public async Task<ActionResult<IEnumerable<ItemDto>>> GetAll(int itemId)
+        {
+            string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
+
+            return Ok((await _itemRepository.GetAll(itemId, username)).Select(o => _mapper.Map<ItemDto>(o)));
+        }
 
         [Authorize]
-        [HttpGet("all/{roomId}")]
-        public async Task<ActionResult<IEnumerable<ItemDto>>> GetAll(int roomId)
+        [HttpGet("/api/room/{roomId}/items")]
+        public async Task<ActionResult<IEnumerable<ItemDto>>> GetAllRoom(int roomId)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
 
@@ -65,16 +73,16 @@ namespace Inventory_API.Controllers
                 return NotFound($"Room with id {roomId} not found");
             }
 
-            return Ok((await _itemRepository.GetAllFromRoom(roomId,username)).Select(o => _mapper.Map<ItemDto>(o)));
+            return Ok((await _itemRepository.GetAllFromRoom(roomId, username)).Select(o => _mapper.Map<ItemDto>(o)));
         }
 
         [Authorize]
-        [HttpGet("recursive/{id}")]
+        [HttpGet("{id}/recursive")]
         public async Task<ActionResult<RecursiveItemDto>> GetRecursive(int id)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
 
-            Item item = await _itemRepository.GetRecursive(id,username);
+            Item item = await _itemRepository.GetRecursive(id, username);
             if (item == null || !item.Room.SharedWith.Any(x => x.Username == username))
             {
                 return NotFound($"Item with id '{id}' not found.");
@@ -89,7 +97,7 @@ namespace Inventory_API.Controllers
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
 
-            Item item = await _itemRepository.Get(id,username);
+            Item item = await _itemRepository.Get(id, username);
             if (item == null || !item.Room.SharedWith.Any(x => x.Username == username))
             {
                 return NotFound($"Item with id '{id}' not found.");
@@ -145,11 +153,11 @@ namespace Inventory_API.Controllers
 
         [Authorize]
         [HttpPut("{id}")]
-        public async Task<ActionResult<ItemDto>> Put(int id, UpdateItemDto dto) // need to do validation to prevent loops
+        public async Task<ActionResult<ItemDto>> Put(int id, UpdateItemDto dto)
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
 
-            Item item = await _itemRepository.Get(id,username);
+            Item item = await _itemRepository.Get(id, username);
             if (item == null || !item.Room.SharedWith.Any(x => x.Username == username))
             {
                 return NotFound($"Item with id '{id}' not found");
@@ -181,6 +189,10 @@ namespace Inventory_API.Controllers
             item.Category = category;
             item.ParentItem = parentItem;
             item.Room = room;
+            if (await CheckForTreeLoops(item, username))
+            {
+                return ValidationProblem($"Parent item invalid");
+            }
             await _itemRepository.Put(item);
 
             return Ok(_mapper.Map<ItemDto>(item));
@@ -192,7 +204,7 @@ namespace Inventory_API.Controllers
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
 
-            Item item = await _itemRepository.Get(id,username);
+            Item item = await _itemRepository.Get(id, username);
             if (item == null || !item.Room.SharedWith.Any(x => x.Username == username))
             {
                 return NotFound($"Item with id '{id}' not found");
@@ -204,6 +216,16 @@ namespace Inventory_API.Controllers
             await _itemRepository.Delete(item);
 
             return NoContent();
+        }
+
+        private async Task<bool> CheckForTreeLoops(Item item, string username)
+        {
+            IEnumerable<Item> items = await _itemRepository.GetAll(item.Id, username);
+            if (items.Any(x => x.Id == item.ParentItem.Id))
+            {
+                return true;
+            }
+            return false;
         }
 
         private async Task<ActionResult> Delete(Item item)
