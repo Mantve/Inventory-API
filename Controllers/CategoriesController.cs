@@ -53,7 +53,7 @@ namespace Inventory_API.Controllers
 
             List<Category> categories = new();
 
-            IEnumerable<Item> items = await _itemRepository.GetAllFromRoom(id, username);
+            IEnumerable<Item> items = await _itemRepository.GetAllFromRoom(id, username, false);
             foreach (Item item in items)
             {
                 categories.Add(item.Category);
@@ -68,7 +68,7 @@ namespace Inventory_API.Controllers
         {
             string username = User.FindFirst(ClaimsIdentity.DefaultNameClaimType)?.Value;
 
-            IEnumerable<Item> items = await _itemRepository.GetAll(id, username);
+            IEnumerable<Item> items = await _itemRepository.GetAll(id, username, false);
 
             List<Category> categories = new();
 

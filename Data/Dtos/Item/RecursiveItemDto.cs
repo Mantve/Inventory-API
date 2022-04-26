@@ -14,6 +14,7 @@ namespace Inventory_API.Data.Dtos.Item
         CategoryDto Category,
         List<RecursiveItemDto> Items,
         int Level,
-        ParentlessItemDto ParentItem);
+        ChildlessItemDto ParentItem,
+        bool Sold);
 
 }

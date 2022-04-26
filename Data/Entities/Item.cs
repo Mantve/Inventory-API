@@ -16,5 +16,6 @@ namespace Inventory_API.Data.Entities
         [Required] public Room Room { get; set; }
         public int Level { get; set; }
         public Item ParentItem { get; set; }
+        [DefaultValue(false)] public bool Sold { get; set; }
     }
 }

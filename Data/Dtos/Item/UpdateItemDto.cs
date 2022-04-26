@@ -7,6 +7,7 @@
         int CategoryId,
         int? ParentItemId,
         string Comments,
-        int RoomId);
+        int RoomId,
+        bool Sold);
 
 }

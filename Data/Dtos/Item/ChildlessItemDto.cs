@@ -3,7 +3,7 @@ using Inventory_API.Data.Dtos.Room;
 
 namespace Inventory_API.Data.Dtos.Item
 {
-    public record ParentlessItemDto(
+    public record ChildlessItemDto(
         int Id,
         string Name,
         float Quantity,
@@ -11,5 +11,7 @@ namespace Inventory_API.Data.Dtos.Item
         CategoryDto Category,
         string Comments,
         RoomDto Room,
-        int Level);
+        int Level,
+        ChildlessItemDto ParentItem,
+        bool Sold);
 }
